@@ -59,8 +59,9 @@ export async function analyzeJobWithAI(
 
     const truncatedJobDesc = truncateText(jobDescription, 3000);
 
+    console.log("Job analyzer: Calling OpenAI API...");
     const response = await openai.chat.completions.create({
-      model: "gpt-5",
+      model: "gpt-4.1",
       messages: [
         {
           role: "system",
@@ -102,11 +103,13 @@ ${truncatedJobDesc}`
       max_completion_tokens: 1500,
     });
 
+    console.log("Job analyzer: Response received:", JSON.stringify(response.choices[0], null, 2));
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      console.error("AI yanıt vermedi, fallback kullanılıyor");
+      console.error("AI yanıt vermedi, fallback kullanılıyor. Response:", JSON.stringify(response, null, 2));
       return fallbackAnalysis(userSkills, jobDescription);
     }
+    console.log("Job analyzer: Content parsed successfully");
 
     const rawParsed = JSON.parse(content);
     const validated = jobAnalysisSchema.safeParse(rawParsed);

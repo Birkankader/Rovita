@@ -149,18 +149,28 @@ export default function JobAnalysis() {
               <Briefcase className="size-12 mb-4 opacity-20" />
               <p>Analiz sonuçları burada görünecek</p>
               {previousAnalyses.length > 0 && (
-                <div className="mt-4 text-sm">
-                  <p className="font-medium text-foreground mb-2">Son Analizler:</p>
-                  {previousAnalyses.slice(0, 3).map((analysis) => (
-                    <button
-                      key={analysis.id}
-                      onClick={() => setResult(analysis)}
-                      className="block w-full text-left px-3 py-2 rounded-md hover:bg-muted transition-colors"
-                      data-testid={`button-previous-analysis-${analysis.id}`}
-                    >
-                      {analysis.jobTitle} - %{analysis.matchScore}
-                    </button>
-                  ))}
+                <div className="mt-6 w-full text-sm">
+                  <p className="font-medium text-foreground mb-3">Son Analizler:</p>
+                  <div className="space-y-2">
+                    {previousAnalyses.slice(0, 3).map((analysis) => (
+                      <button
+                        key={analysis.id}
+                        onClick={() => setResult(analysis)}
+                        className="group block w-full text-left px-4 py-3 rounded-lg border border-border bg-card hover:bg-primary/5 hover:border-primary/30 hover:shadow-md transition-all duration-200 cursor-pointer"
+                        data-testid={`button-previous-analysis-${analysis.id}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-foreground group-hover:text-primary transition-colors">{analysis.jobTitle}</span>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={analysis.matchScore >= 70 ? "default" : analysis.matchScore >= 40 ? "secondary" : "destructive"} className="text-xs">
+                              %{analysis.matchScore}
+                            </Badge>
+                            <ArrowRight className="size-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
