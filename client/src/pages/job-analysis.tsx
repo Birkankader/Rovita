@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Briefcase, CheckCircle2, XCircle, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Briefcase, CheckCircle2, XCircle, AlertCircle, ArrowRight, Loader2, Link as LinkIcon, Info } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -31,6 +31,31 @@ export default function JobAnalysis() {
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [result, setResult] = useState<JobAnalysis | null>(null);
+  const [showUrlWarning, setShowUrlWarning] = useState(false);
+
+  const isJobUrl = (text: string) => {
+    const urlPatterns = [
+      /linkedin\.com\/jobs/i,
+      /kariyer\.net/i,
+      /indeed\.com/i,
+      /glassdoor\.com/i,
+      /secretcv\.com/i,
+      /yenibiris\.com/i,
+      /eleman\.net/i,
+    ];
+    return urlPatterns.some(pattern => pattern.test(text));
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setJobDescription(value);
+    
+    if (isJobUrl(value) && value.trim().split('\n').length <= 3) {
+      setShowUrlWarning(true);
+    } else {
+      setShowUrlWarning(false);
+    }
+  };
 
   const analyzeMutation = useMutation({
     mutationFn: async (data: { jobTitle: string; jobDescription: string }) => {
@@ -118,9 +143,21 @@ export default function JobAnalysis() {
                   className="min-h-[300px] font-mono text-sm leading-relaxed" 
                   placeholder="Tam iş tanımını buraya yapıştırın..." 
                   value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
+                  onChange={handleDescriptionChange}
                   data-testid="input-jobdescription"
                 />
+                {showUrlWarning && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+                    <Info className="size-4 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium">Link algılandı!</p>
+                      <p className="text-amber-700 mt-1">
+                        LinkedIn, KariyerNet gibi sitelerin linki yerine, iş ilanının tam metnini kopyalayıp yapıştırın. 
+                        İlan sayfasını açın ve iş tanımı, gereksinimler ve nitelikler bölümlerini seçip kopyalayın.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
               <Button 
                 onClick={handleAnalyze} 

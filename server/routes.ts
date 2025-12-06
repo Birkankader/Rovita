@@ -550,6 +550,55 @@ export async function registerRoutes(
     }
   });
 
+  // Soft skill titles and descriptions for quest creation
+  const softSkillInfo: Record<string, { title: string; description: string; tasks: Array<{ id: string; title: string; description: string; completed: boolean }> }> = {
+    leadership: {
+      title: "Liderlik Becerilerini Geliştir",
+      description: "Ekip yönetimi, karar verme ve motivasyon yeteneklerini güçlendir.",
+      tasks: [
+        { id: "task-1", title: "Liderlik kitabı oku", description: "Bir liderlik veya yönetim kitabı okuyun", completed: false },
+        { id: "task-2", title: "Mentorluk yap", description: "Bir junior meslektaşa mentorluk yapın", completed: false },
+        { id: "task-3", title: "Toplantı yönet", description: "Bir ekip toplantısını yönetin ve sonuçları raporlayın", completed: false },
+      ]
+    },
+    communication: {
+      title: "İletişim Becerilerini Geliştir",
+      description: "Etkili iletişim, sunum ve ikna kabiliyetlerini güçlendir.",
+      tasks: [
+        { id: "task-1", title: "Sunum yap", description: "Bir konuda 5 dakikalık sunum hazırlayın ve yapın", completed: false },
+        { id: "task-2", title: "Aktif dinleme pratik", description: "Bir görüşmede aktif dinleme tekniklerini uygulayın", completed: false },
+        { id: "task-3", title: "Yazılı iletişim", description: "Karmaşık bir konuyu basit bir şekilde yazılı olarak açıklayın", completed: false },
+      ]
+    },
+    problem_solving: {
+      title: "Problem Çözme Becerilerini Geliştir",
+      description: "Analitik düşünme ve yaratıcı çözüm üretme becerilerini güçlendir.",
+      tasks: [
+        { id: "task-1", title: "Kök neden analizi", description: "Bir sorunu 5 Neden tekniği ile analiz edin", completed: false },
+        { id: "task-2", title: "Algoritma çöz", description: "Bir algoritma problemi çözün ve çözümü dokümante edin", completed: false },
+        { id: "task-3", title: "Beyin fırtınası", description: "Bir problem için en az 5 alternatif çözüm üretin", completed: false },
+      ]
+    },
+    empathy: {
+      title: "Empati Becerilerini Geliştir",
+      description: "Duygusal zeka ve başkalarını anlama yeteneğini güçlendir.",
+      tasks: [
+        { id: "task-1", title: "Perspektif değiştir", description: "Bir tartışmada karşı tarafın bakış açısını yazılı olarak ifade edin", completed: false },
+        { id: "task-2", title: "Geri bildirim al", description: "İş arkadaşlarınızdan empati beceriniz hakkında geri bildirim alın", completed: false },
+        { id: "task-3", title: "Aktif destek ol", description: "Zor bir dönemden geçen bir meslektaşa destek olun", completed: false },
+      ]
+    },
+    adaptability: {
+      title: "Uyum Becerilerini Geliştir",
+      description: "Değişime uyum sağlama ve esneklik becerilerini güçlendir.",
+      tasks: [
+        { id: "task-1", title: "Yeni araç öğren", description: "Daha önce kullanmadığınız bir araç veya teknolojiyi öğrenin", completed: false },
+        { id: "task-2", title: "Konfor alanı dışına çık", description: "Normalde yapmadığınız bir görev üstlenin", completed: false },
+        { id: "task-3", title: "Değişimi belgele", description: "Bir değişikliğe nasıl uyum sağladığınızı günlük tutarak izleyin", completed: false },
+      ]
+    },
+  };
+
   // Create assessment result
   app.post("/api/assessments", requireAuth, async (req: Request, res: Response) => {
     try {
@@ -569,6 +618,30 @@ export async function registerRoutes(
           totalXp: progress.totalXp + xpReward,
           lastActivityDate: new Date(),
         });
+      }
+
+      // Auto-create learning quest for low scores
+      if (resultData.score < 80) {
+        const skillInfo = softSkillInfo[resultData.assessmentType];
+        if (skillInfo) {
+          const existingQuests = await storage.getLearningQuests(req.session.userId!);
+          const alreadyExists = existingQuests.some(
+            q => q.targetSkill.toLowerCase() === resultData.assessmentType.toLowerCase()
+          );
+          
+          if (!alreadyExists) {
+            await storage.createLearningQuest(req.session.userId!, {
+              title: skillInfo.title,
+              description: skillInfo.description,
+              targetSkill: resultData.assessmentType,
+              level: "beginner",
+              status: "pending",
+              progress: 0,
+              xp: 75,
+              tasks: skillInfo.tasks,
+            });
+          }
+        }
       }
 
       res.status(201).json(result);
