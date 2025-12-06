@@ -1,0 +1,84 @@
+2025-12-06 23:01:39.53
+846d3852
+User
+at e.json (/home/runner/workspace/dist/index.cjs:121:13938)
+2025-12-06 23:01:39.53
+846d3852
+User
+at Pe.send (/home/runner/workspace/dist/index.cjs:59:20561)
+2025-12-06 23:01:39.53
+846d3852
+User
+at hi.process_params (/home/runner/workspace/dist/index.cjs:44:8466)
+2025-12-06 23:01:39.53
+846d3852
+User
+at Pe.json (/home/runner/workspace/dist/index.cjs:59:21691)
+2025-12-06 23:01:39.53
+846d3852
+User
+at w (/home/runner/workspace/dist/index.cjs:44:8326)
+2025-12-06 23:01:39.53
+846d3852
+User
+at Pe.set.Pe.header (/home/runner/workspace/dist/index.cjs:59:25022)
+2025-12-06 23:01:39.53
+846d3852
+User
+Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+2025-12-06 23:01:39.53
+846d3852
+User
+at Us.handle_error (/home/runner/workspace/dist/index.cjs:44:3052)
+2025-12-06 23:01:39.53
+846d3852
+User
+at /home/runner/workspace/dist/index.cjs:44:7944
+2025-12-06 23:01:39.53
+846d3852
+User
+at ServerResponse.setHeader (node:_http_outgoing:655:11)
+2025-12-06 23:01:39.53
+846d3852
+User
+at /home/runner/workspace/dist/index.cjs:121:14256
+2025-12-06 23:01:49.82
+846d3852
+User
+at ay. (/home/runner/workspace/dist/index.cjs:72:15237)
+2025-12-06 23:01:49.82
+846d3852
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:81:21)
+2025-12-06 23:01:49.82
+846d3852
+User
+at Us.handle_request (/home/runner/workspace/dist/index.cjs:44:3170)
+2025-12-06 23:01:49.82
+846d3852
+User
+at emitCloseNT (node:internal/streams/destroy:147:10)
+2025-12-06 23:01:49.82
+846d3852
+User
+at ay.emit (node:events:524:28)
+2025-12-06 23:01:49.82
+846d3852
+User
+at l (/home/runner/workspace/dist/index.cjs:44:5250)
+2025-12-06 23:01:49.82
+846d3852
+User
+at _ (/home/runner/workspace/dist/index.cjs:72:13590)
+2025-12-06 23:01:49.82
+846d3852
+User
+at S (/home/runner/workspace/dist/index.cjs:72:13628)
+2025-12-06 23:01:49.82
+846d3852
+User
+CV parse error: TypeError: Rb is not a function
+2025-12-06 23:01:49.82
+846d3852
+User
+at /home/runner/workspace/dist/index.cjs:121:11857

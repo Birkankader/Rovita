@@ -12,19 +12,28 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
-import { createRequire } from "module";
-import { fileURLToPath } from "url";
 import { parseCVText } from "./cv-parser";
 
-// Handle both ESM (dev) and CJS (prod) environments for pdf-parse
-let pdfParse: any;
-if (typeof import.meta.url !== "undefined") {
-  // ESM mode (development with tsx)
-  const requireModule = createRequire(import.meta.url);
-  pdfParse = requireModule("pdf-parse");
-} else {
-  // CJS mode (production bundle) - use global require
-  pdfParse = (globalThis as any).require?.("pdf-parse") || eval('require')("pdf-parse");
+// Lazy load pdf-parse to handle both ESM (dev) and CJS (prod) environments
+let pdfParseModule: any = null;
+async function getPdfParse() {
+  if (pdfParseModule) return pdfParseModule;
+  
+  try {
+    // Try dynamic import first (works in both ESM and modern Node.js)
+    const module = await import("pdf-parse");
+    pdfParseModule = module.default || module;
+    return pdfParseModule;
+  } catch (e) {
+    // Fallback for CJS environments
+    try {
+      pdfParseModule = require("pdf-parse");
+      return pdfParseModule;
+    } catch (e2) {
+      console.error("Failed to load pdf-parse:", e2);
+      throw new Error("PDF parsing module not available");
+    }
+  }
 }
 
 const scryptAsync = promisify(scrypt);
@@ -522,6 +531,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: "CV dosyası gerekli" });
       }
 
+      const pdfParse = await getPdfParse();
       const pdfData = await pdfParse(req.file.buffer);
       const cvText = pdfData.text;
 
