@@ -12,6 +12,7 @@ import JobAnalysis from "@/pages/job-analysis";
 import Roadmap from "@/pages/roadmap";
 import Assessment from "@/pages/assessment";
 import Profile from "@/pages/profile";
+import Settings from "@/pages/settings";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
         <Route path="/roadmap" component={Roadmap} />
         <Route path="/assessment" component={Assessment} />
         <Route path="/profile" component={Profile} />
+        <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

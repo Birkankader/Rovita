@@ -1,8 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, Briefcase, LayoutDashboard, Map, LogOut } from "lucide-react";
+import { Menu, User, Briefcase, LayoutDashboard, Map, LogOut, Settings } from "lucide-react";
 import { useState } from "react";
+import { Notifications } from "./notifications";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -45,10 +46,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </Link>
             ))}
             <div className="h-6 w-px bg-border mx-2" />
-            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-              <LogOut className="size-4" />
-              Sign Out
-            </Button>
+            
+            <Notifications />
+            
+            <Link href="/settings">
+              <Button variant="ghost" size="icon" className={isActive("/settings") ? "text-primary bg-muted" : "text-muted-foreground"}>
+                <Settings className="size-5" />
+                <span className="sr-only">Settings</span>
+              </Button>
+            </Link>
           </nav>
 
           {/* Mobile Nav */}
@@ -76,6 +82,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </a>
                   </Link>
                 ))}
+                <div className="h-px bg-border my-2" />
+                <Link href="/settings">
+                  <a 
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-md text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    <Settings className="size-5" />
+                    Settings
+                  </a>
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>
