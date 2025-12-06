@@ -417,6 +417,69 @@ export async function registerRoutes(
     }
   });
 
+  // Update quest task (toggle completion)
+  app.put("/api/quests/:questId/tasks/:taskId", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { questId, taskId } = req.params;
+      const { completed } = z.object({ completed: z.boolean() }).parse(req.body);
+
+      const existingQuest = await storage.getLearningQuest(questId);
+      if (!existingQuest || existingQuest.userId !== req.session.userId) {
+        return res.status(404).json({ message: "Görev bulunamadı" });
+      }
+
+      const tasks = (existingQuest.tasks as Array<{ id: string; title: string; description: string; completed: boolean }>) || [];
+      
+      if (tasks.length === 0) {
+        return res.json(existingQuest);
+      }
+      
+      const taskIndex = tasks.findIndex(t => t.id === taskId);
+      if (taskIndex === -1) {
+        return res.status(404).json({ message: "Alt görev bulunamadı" });
+      }
+
+      tasks[taskIndex].completed = completed;
+      
+      const completedCount = tasks.filter(t => t.completed).length;
+      const newProgress = Math.round((completedCount / tasks.length) * 100);
+      const allTasksCompleted = completedCount === tasks.length;
+      const wasCompleted = existingQuest.status === "completed";
+      
+      const updateData: any = {
+        tasks,
+        progress: newProgress,
+      };
+      
+      if (allTasksCompleted && !wasCompleted) {
+        updateData.status = "completed";
+        updateData.completedAt = new Date();
+        
+        const progress = await storage.getUserProgress(req.session.userId!);
+        if (progress) {
+          const xpReward = existingQuest.xp || 50;
+          const newXp = progress.totalXp + xpReward;
+          const newLevel = Math.floor(newXp / 500) + 1;
+          await storage.updateUserProgress(req.session.userId!, {
+            totalXp: newXp,
+            currentLevel: newLevel,
+            lastActivityDate: new Date(),
+          });
+        }
+      }
+      
+      const quest = await storage.updateLearningQuest(questId, updateData);
+
+      res.json(quest);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Geçersiz veri" });
+      }
+      console.error("Update task error:", error);
+      res.status(500).json({ message: "Alt görev güncellenirken hata oluştu" });
+    }
+  });
+
   // ==================== PROGRESS ROUTES ====================
 
   // Get user progress

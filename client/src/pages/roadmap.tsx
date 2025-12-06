@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Circle, Lock, Clock, BrainCircuit, Plus, Loader2, Target } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CheckCircle2, Circle, Lock, Clock, BrainCircuit, Plus, Loader2, Target, ChevronDown, ChevronRight } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -14,6 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+interface QuestTask {
+  id: string;
+  title: string;
+  description: string;
+  completed: boolean;
+}
+
 interface LearningQuest {
   id: string;
   userId: string;
@@ -23,6 +31,7 @@ interface LearningQuest {
   status: string;
   progress: number;
   xp: number;
+  tasks: QuestTask[];
   createdAt: string;
 }
 
@@ -37,6 +46,7 @@ export default function Roadmap() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [expandedQuestId, setExpandedQuestId] = useState<string | null>(null);
   const [newQuest, setNewQuest] = useState({
     title: "",
     description: "",
@@ -83,6 +93,17 @@ export default function Roadmap() {
       queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/progress"] });
       toast({ title: "Başarılı", description: "Görev güncellendi." });
+    },
+  });
+
+  const toggleTaskMutation = useMutation({
+    mutationFn: async ({ questId, taskId, completed }: { questId: string; taskId: string; completed: boolean }) => {
+      const res = await apiRequest("PUT", `/api/quests/${questId}/tasks/${taskId}`, { completed });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/progress"] });
     },
   });
 
@@ -247,84 +268,152 @@ export default function Roadmap() {
               </Button>
             </Card>
           ) : (
-            quests.map((quest) => (
-              <div
-                key={quest.id}
-                className={`p-4 rounded-xl border transition-all cursor-pointer ${
-                  quest.status === "active" || quest.status === "in_progress"
-                    ? "bg-card border-primary/50 shadow-md ring-1 ring-primary/20"
-                    : quest.status === "completed"
-                    ? "bg-green-50/50 border-green-200/50 opacity-80"
-                    : "bg-muted/30 border-transparent hover:bg-muted/50"
-                }`}
-                data-testid={`quest-card-${quest.id}`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <Badge
-                    variant={quest.status === "completed" ? "secondary" : quest.status === "active" ? "default" : "outline"}
-                    className={
-                      quest.status === "completed"
-                        ? "bg-green-100 text-green-700"
-                        : quest.status === "active"
-                        ? "bg-primary"
-                        : ""
-                    }
+            quests.map((quest) => {
+              const isExpanded = expandedQuestId === quest.id;
+              const tasks = quest.tasks || [];
+              const completedTasks = tasks.filter(t => t.completed).length;
+              const taskProgress = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : quest.progress;
+              
+              return (
+                <div
+                  key={quest.id}
+                  className={`rounded-xl border transition-all ${
+                    quest.status === "active" || quest.status === "in_progress"
+                      ? "bg-card border-primary/50 shadow-md ring-1 ring-primary/20"
+                      : quest.status === "completed"
+                      ? "bg-green-50/50 border-green-200/50 opacity-80"
+                      : "bg-muted/30 border-transparent hover:bg-muted/50"
+                  }`}
+                  data-testid={`quest-card-${quest.id}`}
+                >
+                  <div 
+                    className="p-4 cursor-pointer"
+                    onClick={() => setExpandedQuestId(isExpanded ? null : quest.id)}
+                    data-testid={`quest-header-${quest.id}`}
                   >
-                    {quest.status === "completed" ? "Tamamlandı" : quest.status === "active" ? "Devam Ediyor" : "Bekliyor"}
-                  </Badge>
-                  <span className="text-xs font-bold text-accent">+{quest.xp} XP</span>
-                </div>
-                <h4 className="font-bold mb-1">{quest.title}</h4>
-                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-                  {quest.description || `${quest.targetSkill} becerisini geliştir`}
-                </p>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                        {isExpanded ? (
+                          <ChevronDown className="size-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="size-4 text-muted-foreground" />
+                        )}
+                        <Badge
+                          variant={quest.status === "completed" ? "secondary" : quest.status === "active" ? "default" : "outline"}
+                          className={
+                            quest.status === "completed"
+                              ? "bg-green-100 text-green-700"
+                              : quest.status === "active"
+                              ? "bg-primary"
+                              : ""
+                          }
+                        >
+                          {quest.status === "completed" ? "Tamamlandı" : quest.status === "active" ? "Devam Ediyor" : "Bekliyor"}
+                        </Badge>
+                      </div>
+                      <span className="text-xs font-bold text-accent">+{quest.xp} XP</span>
+                    </div>
+                    <h4 className="font-bold mb-1">{quest.title}</h4>
+                    {!isExpanded && (
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                        {quest.description || `${quest.targetSkill} becerisini geliştir`}
+                      </p>
+                    )}
+                    {tasks.length > 0 && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Progress value={taskProgress} className="h-1.5 flex-1" />
+                        <span>{completedTasks}/{tasks.length}</span>
+                      </div>
+                    )}
+                  </div>
 
-                {(quest.status === "active" || quest.status === "in_progress") && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span>%{quest.progress} Tamamlandı</span>
+                  {isExpanded && (
+                    <div className="px-4 pb-4 border-t border-border/50 pt-3 space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        {quest.description || `${quest.targetSkill} becerisini geliştirmek için çalışın.`}
+                      </p>
+
+                      {tasks.length > 0 && (
+                        <div className="space-y-2">
+                          <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Alt Görevler</h5>
+                          {tasks.map((task) => (
+                            <div 
+                              key={task.id} 
+                              className={`p-3 rounded-lg border ${task.completed ? 'bg-green-50/50 border-green-200/50' : 'bg-background border-border/50'}`}
+                              data-testid={`task-item-${quest.id}-${task.id}`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <Checkbox
+                                  id={`task-${quest.id}-${task.id}`}
+                                  checked={task.completed}
+                                  onCheckedChange={(checked) => {
+                                    toggleTaskMutation.mutate({
+                                      questId: quest.id,
+                                      taskId: task.id,
+                                      completed: !!checked,
+                                    });
+                                  }}
+                                  disabled={toggleTaskMutation.isPending || quest.status === "completed"}
+                                  data-testid={`checkbox-task-${quest.id}-${task.id}`}
+                                />
+                                <div className="flex-1">
+                                  <label 
+                                    htmlFor={`task-${quest.id}-${task.id}`}
+                                    className={`text-sm font-medium cursor-pointer ${task.completed ? 'line-through text-muted-foreground' : ''}`}
+                                  >
+                                    {task.title}
+                                  </label>
+                                  <p className={`text-xs mt-1 ${task.completed ? 'text-muted-foreground/60' : 'text-muted-foreground'}`}>
+                                    {task.description}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 pt-2">
+                        {quest.status === "pending" && (
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStartQuest(quest);
+                            }}
+                            data-testid={`button-start-${quest.id}`}
+                          >
+                            Göreve Başla
+                          </Button>
+                        )}
+                        {(quest.status === "active" || quest.status === "in_progress") && (
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCompleteQuest(quest);
+                            }}
+                            disabled={updateQuestMutation.isPending}
+                            data-testid={`button-complete-${quest.id}`}
+                          >
+                            <CheckCircle2 className="mr-2 size-4" />
+                            Görevi Tamamla
+                          </Button>
+                        )}
+                        {quest.status === "completed" && (
+                          <div className="flex items-center gap-2 text-sm text-green-600">
+                            <CheckCircle2 className="size-4" />
+                            Tamamlandı
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <Progress value={quest.progress} className="h-1.5" />
-                    <div className="flex gap-2 mt-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 text-xs"
-                        onClick={() => handleUpdateProgress(quest, Math.min(quest.progress + 25, 100))}
-                        data-testid={`button-progress-${quest.id}`}
-                      >
-                        +25%
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="flex-1 text-xs"
-                        onClick={() => handleCompleteQuest(quest)}
-                        data-testid={`button-complete-${quest.id}`}
-                      >
-                        Tamamla
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                {quest.status === "pending" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full mt-2"
-                    onClick={() => handleStartQuest(quest)}
-                    data-testid={`button-start-${quest.id}`}
-                  >
-                    Başla
-                  </Button>
-                )}
-                {quest.status === "completed" && (
-                  <div className="flex items-center gap-2 text-xs text-green-600 mt-2">
-                    <CheckCircle2 className="size-4" />
-                    Tamamlandı
-                  </div>
-                )}
-              </div>
-            ))
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
 
