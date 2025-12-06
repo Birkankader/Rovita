@@ -2,25 +2,86 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Briefcase, CheckCircle2, XCircle, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { Link } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+
+interface JobAnalysis {
+  id: string;
+  jobTitle: string;
+  jobDescription: string;
+  matchScore: number;
+  skillsMatch: string[];
+  skillsGap: string[];
+  recommendations: string;
+}
 
 export default function JobAnalysis() {
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [hasResult, setHasResult] = useState(false);
+  const [, setLocation] = useLocation();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [result, setResult] = useState<JobAnalysis | null>(null);
+
+  const analyzeMutation = useMutation({
+    mutationFn: async (data: { jobTitle: string; jobDescription: string }) => {
+      const res = await apiRequest("POST", "/api/job-analysis", data);
+      return res.json() as Promise<JobAnalysis>;
+    },
+    onSuccess: (data) => {
+      setResult(data);
+      toast({ title: "Analiz tamamlandı!", description: "Sonuçlarınız hazır." });
+    },
+    onError: (error: any) => {
+      const message = error?.message?.includes("400") 
+        ? "Lütfen tüm alanları doldurun" 
+        : "Analiz sırasında bir hata oluştu";
+      toast({ title: "Hata", description: message, variant: "destructive" });
+    },
+  });
+
+  const { data: previousAnalyses = [] } = useQuery<JobAnalysis[]>({
+    queryKey: ["/api/job-analysis"],
+    enabled: isAuthenticated,
+  });
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/login");
+    }
+  }, [authLoading, isAuthenticated, setLocation]);
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleAnalyze = () => {
-    setIsAnalyzing(true);
-    // Simulate AI delay
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setHasResult(true);
-    }, 1500);
+    if (!jobTitle.trim() || !jobDescription.trim()) {
+      toast({ title: "Hata", description: "Lütfen iş unvanı ve açıklama girin", variant: "destructive" });
+      return;
+    }
+    analyzeMutation.mutate({ jobTitle, jobDescription });
   };
+
+  const criticalGaps = result?.skillsGap?.slice(0, 3) || [];
+  const hasResult = result !== null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -41,24 +102,34 @@ export default function JobAnalysis() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>İş Unvanı</Label>
-                <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="ör. Kıdemli Ürün Tasarımcısı" />
+                <Label htmlFor="jobTitle">İş Unvanı</Label>
+                <Input 
+                  id="jobTitle"
+                  placeholder="ör. Kıdemli Ürün Tasarımcısı"
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  data-testid="input-jobtitle"
+                />
               </div>
               <div className="space-y-2">
-                <Label>Açıklama</Label>
+                <Label htmlFor="jobDescription">Açıklama</Label>
                 <Textarea 
+                  id="jobDescription"
                   className="min-h-[300px] font-mono text-sm leading-relaxed" 
                   placeholder="Tam iş tanımını buraya yapıştırın..." 
-                  defaultValue="5+ yıl deneyimli, Figma, Prototipleme ve Tasarım Sistemleri konularında yetkin bir Kıdemli Ürün Tasarımcısı arıyoruz. Kullanıcı Araştırması ve Kullanılabilirlik Testi deneyimi gereklidir. HTML/CSS bilgisi artıdır. Güçlü iletişim becerileri ve liderlik yeteneği esastır."
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  data-testid="input-jobdescription"
                 />
               </div>
               <Button 
                 onClick={handleAnalyze} 
                 className="w-full" 
                 size="lg"
-                disabled={isAnalyzing}
+                disabled={analyzeMutation.isPending}
+                data-testid="button-analyze"
               >
-                {isAnalyzing ? (
+                {analyzeMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Analiz Ediliyor...
@@ -77,6 +148,21 @@ export default function JobAnalysis() {
             <div className="h-full border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center text-center p-8 text-muted-foreground bg-muted/20">
               <Briefcase className="size-12 mb-4 opacity-20" />
               <p>Analiz sonuçları burada görünecek</p>
+              {previousAnalyses.length > 0 && (
+                <div className="mt-4 text-sm">
+                  <p className="font-medium text-foreground mb-2">Son Analizler:</p>
+                  {previousAnalyses.slice(0, 3).map((analysis) => (
+                    <button
+                      key={analysis.id}
+                      onClick={() => setResult(analysis)}
+                      className="block w-full text-left px-3 py-2 rounded-md hover:bg-muted transition-colors"
+                      data-testid={`button-previous-analysis-${analysis.id}`}
+                    >
+                      {analysis.jobTitle} - %{analysis.matchScore}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-6 animate-in slide-in-from-right-4 duration-500 fade-in">
@@ -85,11 +171,13 @@ export default function JobAnalysis() {
                 <CardContent className="pt-6 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Uyum Skoru</p>
-                    <h2 className="text-4xl font-bold text-primary">%68</h2>
+                    <h2 className="text-4xl font-bold text-primary" data-testid="text-match-score">%{result.matchScore}</h2>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-muted-foreground">Eksik Beceriler</p>
-                    <h2 className="text-2xl font-bold text-destructive">3 Kritik</h2>
+                    <h2 className="text-2xl font-bold text-destructive" data-testid="text-gap-count">
+                      {criticalGaps.length} {criticalGaps.length > 0 ? "Kritik" : ""}
+                    </h2>
                   </div>
                 </CardContent>
               </Card>
@@ -106,10 +194,15 @@ export default function JobAnalysis() {
                       Sahip Olduklarınız
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">Figma</Badge>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">Prototipleme</Badge>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">HTML/CSS</Badge>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">İletişim</Badge>
+                      {result.skillsMatch && result.skillsMatch.length > 0 ? (
+                        result.skillsMatch.map((skill, i) => (
+                          <Badge key={i} variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200" data-testid={`badge-match-${i}`}>
+                            {skill}
+                          </Badge>
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Eşleşen beceri bulunamadı. Profilinize beceri ekleyin.</p>
+                      )}
                     </div>
                   </div>
 
@@ -121,18 +214,18 @@ export default function JobAnalysis() {
                       Eksik / Geliştirilmesi Gereken
                     </h4>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-2 rounded-md bg-destructive/5 border border-destructive/10">
-                        <span className="font-medium text-sm">Tasarım Sistemleri</span>
-                        <Badge variant="outline" className="border-destructive text-destructive">Kritik</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-2 rounded-md bg-destructive/5 border border-destructive/10">
-                        <span className="font-medium text-sm">Kullanıcı Araştırması</span>
-                        <Badge variant="outline" className="border-destructive text-destructive">Kritik</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-2 rounded-md bg-orange-50 border border-orange-100">
-                        <span className="font-medium text-sm text-orange-800">Liderlik</span>
-                        <Badge variant="outline" className="border-orange-200 text-orange-700">Sosyal Beceri</Badge>
-                      </div>
+                      {result.skillsGap && result.skillsGap.length > 0 ? (
+                        result.skillsGap.map((skill, i) => (
+                          <div key={i} className="flex items-center justify-between p-2 rounded-md bg-destructive/5 border border-destructive/10" data-testid={`item-gap-${i}`}>
+                            <span className="font-medium text-sm">{skill}</span>
+                            <Badge variant="outline" className="border-destructive text-destructive">
+                              {i < 3 ? "Kritik" : "Önemli"}
+                            </Badge>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-green-600">Tebrikler! Tüm gerekli becerilere sahipsiniz.</p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -140,19 +233,28 @@ export default function JobAnalysis() {
 
               <Alert className="bg-accent/10 border-accent/20">
                 <AlertCircle className="h-4 w-4 text-accent" />
-                <AlertTitle className="text-accent font-semibold">Önerilen Eylem</AlertTitle>
+                <AlertTitle className="text-accent font-semibold">Öneri</AlertTitle>
                 <AlertDescription className="text-muted-foreground mt-2">
-                  Bu açıkları kapatmak için kişiselleştirilmiş bir öğrenme yolu oluşturduk.
+                  {result.recommendations}
                 </AlertDescription>
                 <div className="mt-4">
                   <Link href="/roadmap">
-                    <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 gap-2">
+                    <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 gap-2" data-testid="button-view-roadmap">
                       Öğrenme Planını Görüntüle
                       <ArrowRight className="size-4" />
                     </Button>
                   </Link>
                 </div>
               </Alert>
+
+              <Button 
+                variant="outline" 
+                onClick={() => setResult(null)} 
+                className="w-full"
+                data-testid="button-new-analysis"
+              >
+                Yeni Analiz Yap
+              </Button>
             </div>
           )}
         </div>

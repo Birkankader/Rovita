@@ -27,26 +27,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-background font-sans text-foreground">
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/">
-            <a className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight hover:opacity-80 transition-opacity">
-              <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-                <Briefcase className="size-5" />
-              </div>
-              <span>CareerAscend</span>
-            </a>
+          <Link href="/" className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight hover:opacity-80 transition-opacity">
+            <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+              <Briefcase className="size-5" />
+            </div>
+            <span>CareerAscend</span>
           </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href}>
-                <a
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    isActive(item.href) ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  {item.label}
-                </a>
+              <Link 
+                key={item.href} 
+                href={item.href}
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  isActive(item.href) ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {item.label}
               </Link>
             ))}
             <div className="h-6 w-px bg-border mx-2" />
@@ -72,29 +70,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <SheetContent side="right">
               <nav className="flex flex-col gap-4 mt-8">
                 {navItems.map((item) => (
-                  <Link key={item.href} href={item.href}>
-                    <a
-                      onClick={() => setIsOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
-                        isActive(item.href)
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-muted-foreground hover:bg-muted"
-                      }`}
-                    >
-                      <item.icon className="size-5" />
-                      {item.label}
-                    </a>
+                  <Link 
+                    key={item.href} 
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
+                      isActive(item.href)
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <item.icon className="size-5" />
+                    {item.label}
                   </Link>
                 ))}
                 <div className="h-px bg-border my-2" />
-                <Link href="/settings">
-                  <a 
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-md text-muted-foreground hover:bg-muted transition-colors"
-                  >
-                    <Settings className="size-5" />
-                    Ayarlar
-                  </a>
+                <Link 
+                  href="/settings"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-md text-muted-foreground hover:bg-muted transition-colors"
+                >
+                  <Settings className="size-5" />
+                  Ayarlar
                 </Link>
               </nav>
             </SheetContent>

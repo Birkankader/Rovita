@@ -7,20 +7,29 @@ import { Separator } from "@/components/ui/separator";
 import { Link, useLocation } from "wouter";
 import { Briefcase, Github, Linkedin, Mail, ArrowRight, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import authImage from "@assets/generated_images/auth_illustration.png";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, isLoggingIn } = useAuth();
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await login({ email, password });
+      toast({ title: "Giriş başarılı!", description: "Hoş geldiniz." });
       setLocation("/dashboard");
-    }, 1500);
+    } catch (error: any) {
+      const message = error?.message?.includes("401") 
+        ? "Email veya şifre hatalı" 
+        : "Giriş sırasında bir hata oluştu";
+      toast({ title: "Hata", description: message, variant: "destructive" });
+    }
   };
 
   return (
@@ -29,13 +38,11 @@ export default function Login() {
       <div className="flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md space-y-8">
           <div className="space-y-2 text-center lg:text-left">
-            <Link href="/">
-              <a className="inline-flex items-center gap-2 font-heading font-bold text-2xl mb-8 text-primary">
-                <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-                  <Briefcase className="size-5" />
-                </div>
-                CareerAscend
-              </a>
+            <Link href="/" className="inline-flex items-center gap-2 font-heading font-bold text-2xl mb-8 text-primary">
+              <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                <Briefcase className="size-5" />
+              </div>
+              CareerAscend
             </Link>
             <h1 className="text-3xl font-heading font-bold">Tekrar Hoş Geldiniz</h1>
             <p className="text-muted-foreground">Kariyer yolculuğunuza devam etmek için giriş yapın.</p>
@@ -45,27 +52,43 @@ export default function Login() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">E-posta Adresi</Label>
-                <Input id="email" type="email" placeholder="ornek@sirket.com" required />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="ornek@sirket.com" 
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  data-testid="input-email"
+                />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Şifre</Label>
-                  <Link href="/forgot-password">
-                    <a className="text-xs text-primary hover:underline font-medium">Şifremi unuttum?</a>
+                  <Link href="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+                    Şifremi unuttum?
                   </Link>
                 </div>
-                <Input id="password" type="password" placeholder="••••••••" required />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="••••••••" 
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  data-testid="input-password"
+                />
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="remember" />
+                <Checkbox id="remember" data-testid="checkbox-remember" />
                 <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground">
                   Beni hatırla
                 </Label>
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" className="w-full h-11 text-base" disabled={isLoggingIn} data-testid="button-login">
+              {isLoggingIn ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Giriş Yapılıyor...
@@ -87,11 +110,11 @@ export default function Login() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" type="button" className="h-11">
+              <Button variant="outline" type="button" className="h-11" data-testid="button-linkedin">
                 <Linkedin className="mr-2 size-4 text-[#0077b5]" />
                 LinkedIn
               </Button>
-              <Button variant="outline" type="button" className="h-11">
+              <Button variant="outline" type="button" className="h-11" data-testid="button-github">
                 <Github className="mr-2 size-4" />
                 GitHub
               </Button>
@@ -100,8 +123,8 @@ export default function Login() {
 
           <p className="text-center text-sm text-muted-foreground">
             Hesabınız yok mu?{" "}
-            <Link href="/register">
-              <a className="font-semibold text-primary hover:underline">Hemen kayıt olun</a>
+            <Link href="/register" className="font-semibold text-primary hover:underline">
+              Hemen kayıt olun
             </Link>
           </p>
         </div>

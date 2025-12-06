@@ -5,20 +5,31 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useLocation } from "wouter";
 import { Briefcase, Github, Linkedin, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import authImage from "@assets/generated_images/auth_illustration.png";
 
 export default function Register() {
   const [, setLocation] = useLocation();
-  const [isLoading, setIsLoading] = useState(false);
+  const { register, isRegistering } = useAuth();
+  const { toast } = useToast();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await register({ email, password, firstName, lastName });
+      toast({ title: "Kayıt başarılı!", description: "Hoş geldiniz." });
       setLocation("/onboarding");
-    }, 1500);
+    } catch (error: any) {
+      const message = error?.message?.includes("400") 
+        ? "Bu email adresi zaten kayıtlı" 
+        : "Kayıt sırasında bir hata oluştu";
+      toast({ title: "Hata", description: message, variant: "destructive" });
+    }
   };
 
   return (
@@ -27,13 +38,11 @@ export default function Register() {
       <div className="flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md space-y-8">
           <div className="space-y-2 text-center lg:text-left">
-            <Link href="/">
-              <a className="inline-flex items-center gap-2 font-heading font-bold text-2xl mb-8 text-primary">
-                <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-                  <Briefcase className="size-5" />
-                </div>
-                CareerAscend
-              </a>
+            <Link href="/" className="inline-flex items-center gap-2 font-heading font-bold text-2xl mb-8 text-primary">
+              <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                <Briefcase className="size-5" />
+              </div>
+              CareerAscend
             </Link>
             <h1 className="text-3xl font-heading font-bold">Hesap Oluşturun</h1>
             <p className="text-muted-foreground">Kariyer hedeflerinize ulaşmak için ilk adımı atın.</p>
@@ -44,34 +53,65 @@ export default function Register() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">Ad</Label>
-                  <Input id="firstName" placeholder="Ahmet" required />
+                  <Input 
+                    id="firstName" 
+                    placeholder="Ahmet" 
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    data-testid="input-firstname"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Soyad</Label>
-                  <Input id="lastName" placeholder="Yılmaz" required />
+                  <Input 
+                    id="lastName" 
+                    placeholder="Yılmaz" 
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    data-testid="input-lastname"
+                  />
                 </div>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="email">E-posta Adresi</Label>
-                <Input id="email" type="email" placeholder="ornek@sirket.com" required />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="ornek@sirket.com" 
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  data-testid="input-email"
+                />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="password">Şifre</Label>
-                <Input id="password" type="password" placeholder="En az 8 karakter" required />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="En az 6 karakter" 
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  data-testid="input-password"
+                />
               </div>
 
               <div className="flex items-start space-x-2">
-                <Checkbox id="terms" required className="mt-1" />
+                <Checkbox id="terms" required className="mt-1" data-testid="checkbox-terms" />
                 <Label htmlFor="terms" className="text-sm font-normal text-muted-foreground leading-tight">
-                  <Link href="/terms"><a className="text-primary hover:underline">Kullanım Koşulları</a></Link> ve <Link href="/privacy"><a className="text-primary hover:underline">Gizlilik Politikası</a></Link>'nı kabul ediyorum.
+                  <Link href="/terms" className="text-primary hover:underline">Kullanım Koşulları</Link> ve <Link href="/privacy" className="text-primary hover:underline">Gizlilik Politikası</Link>'nı kabul ediyorum.
                 </Label>
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" className="w-full h-11 text-base" disabled={isRegistering} data-testid="button-register">
+              {isRegistering ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Hesap Oluşturuluyor...
@@ -93,11 +133,11 @@ export default function Register() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" type="button" className="h-11">
+              <Button variant="outline" type="button" className="h-11" data-testid="button-linkedin">
                 <Linkedin className="mr-2 size-4 text-[#0077b5]" />
                 LinkedIn
               </Button>
-              <Button variant="outline" type="button" className="h-11">
+              <Button variant="outline" type="button" className="h-11" data-testid="button-github">
                 <Github className="mr-2 size-4" />
                 GitHub
               </Button>
@@ -106,8 +146,8 @@ export default function Register() {
 
           <p className="text-center text-sm text-muted-foreground">
             Zaten hesabınız var mı?{" "}
-            <Link href="/login">
-              <a className="font-semibold text-primary hover:underline">Giriş yapın</a>
+            <Link href="/login" className="font-semibold text-primary hover:underline">
+              Giriş yapın
             </Link>
           </p>
         </div>

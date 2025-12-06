@@ -4,9 +4,115 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Mail, Link as LinkIcon, Github, Linkedin, Edit2, Download, GraduationCap, Briefcase } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { MapPin, Mail, Link as LinkIcon, Github, Linkedin, Edit2, Download, GraduationCap, Briefcase, Loader2, Save, X, Plus } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+interface Profile {
+  id: string;
+  userId: string;
+  jobTitle: string | null;
+  bio: string | null;
+  location: string | null;
+  website: string | null;
+  linkedinUrl: string | null;
+  githubUrl: string | null;
+  skills: string[];
+  experience: any[];
+  education: any[];
+}
 
 export default function Profile() {
+  const [, setLocation] = useLocation();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isEditing, setIsEditing] = useState(false);
+  const [newSkill, setNewSkill] = useState("");
+
+  const { data: profile, isLoading: profileLoading } = useQuery<Profile>({
+    queryKey: ["/api/profile"],
+    enabled: isAuthenticated,
+  });
+
+  const [editForm, setEditForm] = useState<Partial<Profile>>({});
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: Partial<Profile>) => {
+      const res = await apiRequest("PUT", "/api/profile", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      setIsEditing(false);
+      toast({ title: "Başarılı", description: "Profil güncellendi." });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Profil güncellenirken hata oluştu.", variant: "destructive" });
+    },
+  });
+
+  const handleEdit = () => {
+    setEditForm({
+      jobTitle: profile?.jobTitle || "",
+      bio: profile?.bio || "",
+      location: profile?.location || "",
+      website: profile?.website || "",
+      linkedinUrl: profile?.linkedinUrl || "",
+      githubUrl: profile?.githubUrl || "",
+      skills: profile?.skills || [],
+    });
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    updateProfileMutation.mutate(editForm);
+  };
+
+  const handleAddSkill = () => {
+    if (newSkill.trim() && !editForm.skills?.includes(newSkill.trim())) {
+      setEditForm({
+        ...editForm,
+        skills: [...(editForm.skills || []), newSkill.trim()],
+      });
+      setNewSkill("");
+    }
+  };
+
+  const handleRemoveSkill = (skillToRemove: string) => {
+    setEditForm({
+      ...editForm,
+      skills: (editForm.skills || []).filter(s => s !== skillToRemove),
+    });
+  };
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setLocation("/login");
+    }
+  }, [authLoading, isAuthenticated, setLocation]);
+
+  if (authLoading || profileLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  const initials = `${user?.firstName?.charAt(0) || ""}${user?.lastName?.charAt(0) || ""}`.toUpperCase() || "U";
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header Card */}
@@ -14,50 +120,128 @@ export default function Profile() {
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-6 items-start">
             <Avatar className="size-24 md:size-32 border-4 border-background shadow-xl">
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>AD</AvatarFallback>
+              <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-2">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl font-heading font-bold">Alex Designer</h1>
-                  <p className="text-muted-foreground font-medium">Kıdemli Ürün Tasarımcısı</p>
+                  <h1 className="text-2xl font-heading font-bold" data-testid="text-username">
+                    {user?.firstName} {user?.lastName}
+                  </h1>
+                  {isEditing ? (
+                    <Input
+                      value={editForm.jobTitle || ""}
+                      onChange={(e) => setEditForm({ ...editForm, jobTitle: e.target.value })}
+                      placeholder="İş unvanınız"
+                      className="mt-1"
+                      data-testid="input-jobtitle"
+                    />
+                  ) : (
+                    <p className="text-muted-foreground font-medium" data-testid="text-jobtitle">
+                      {profile?.jobTitle || "İş unvanı belirtilmemiş"}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <Download className="mr-2 size-4" />
-                    CV İndir
-                  </Button>
-                  <Button size="sm">
-                    <Edit2 className="mr-2 size-4" />
-                    Profili Düzenle
-                  </Button>
+                  {isEditing ? (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => setIsEditing(false)} data-testid="button-cancel">
+                        <X className="mr-2 size-4" />
+                        İptal
+                      </Button>
+                      <Button size="sm" onClick={handleSave} disabled={updateProfileMutation.isPending} data-testid="button-save">
+                        {updateProfileMutation.isPending ? (
+                          <Loader2 className="mr-2 size-4 animate-spin" />
+                        ) : (
+                          <Save className="mr-2 size-4" />
+                        )}
+                        Kaydet
+                      </Button>
+                    </>
+                  ) : (
+                    <Button size="sm" onClick={handleEdit} data-testid="button-edit">
+                      <Edit2 className="mr-2 size-4" />
+                      Profili Düzenle
+                    </Button>
+                  )}
                 </div>
               </div>
               
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground pt-2">
-                <div className="flex items-center gap-1">
-                  <MapPin className="size-4" />
-                  San Francisco, CA
-                </div>
-                <div className="flex items-center gap-1">
-                  <Mail className="size-4" />
-                  alex@example.com
-                </div>
-                <div className="flex items-center gap-1">
-                  <LinkIcon className="size-4" />
-                  alex.design
-                </div>
+                {isEditing ? (
+                  <>
+                    <Input
+                      value={editForm.location || ""}
+                      onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                      placeholder="Konum"
+                      className="w-40"
+                      data-testid="input-location"
+                    />
+                    <Input
+                      value={editForm.website || ""}
+                      onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
+                      placeholder="Website"
+                      className="w-40"
+                      data-testid="input-website"
+                    />
+                  </>
+                ) : (
+                  <>
+                    {profile?.location && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="size-4" />
+                        {profile.location}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1">
+                      <Mail className="size-4" />
+                      {user?.email}
+                    </div>
+                    {profile?.website && (
+                      <div className="flex items-center gap-1">
+                        <LinkIcon className="size-4" />
+                        {profile.website}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
-              <div className="flex gap-2 pt-2">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                  <Github className="size-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                  <Linkedin className="size-4" />
-                </Button>
-              </div>
+              {isEditing ? (
+                <div className="flex gap-2 pt-2">
+                  <Input
+                    value={editForm.githubUrl || ""}
+                    onChange={(e) => setEditForm({ ...editForm, githubUrl: e.target.value })}
+                    placeholder="GitHub URL"
+                    className="w-48"
+                    data-testid="input-github"
+                  />
+                  <Input
+                    value={editForm.linkedinUrl || ""}
+                    onChange={(e) => setEditForm({ ...editForm, linkedinUrl: e.target.value })}
+                    placeholder="LinkedIn URL"
+                    className="w-48"
+                    data-testid="input-linkedin"
+                  />
+                </div>
+              ) : (
+                <div className="flex gap-2 pt-2">
+                  {profile?.githubUrl && (
+                    <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                        <Github className="size-4" />
+                      </Button>
+                    </a>
+                  )}
+                  {profile?.linkedinUrl && (
+                    <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                        <Linkedin className="size-4" />
+                      </Button>
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
@@ -71,34 +255,72 @@ export default function Profile() {
               <CardTitle className="text-lg">Beceriler</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">Figma</Badge>
-                <Badge variant="secondary">React</Badge>
-                <Badge variant="secondary">TypeScript</Badge>
-                <Badge variant="secondary">Kullanıcı Araştırması</Badge>
-                <Badge variant="secondary">Prototipleme</Badge>
-                <Badge variant="secondary">Tasarım Sistemleri</Badge>
-                <Badge variant="secondary">HTML/CSS</Badge>
-              </div>
+              {isEditing ? (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    {(editForm.skills || []).map((skill, i) => (
+                      <Badge key={i} variant="secondary" className="flex items-center gap-1">
+                        {skill}
+                        <button onClick={() => handleRemoveSkill(skill)} className="ml-1">
+                          <X className="size-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      placeholder="Yeni beceri ekle"
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSkill())}
+                      data-testid="input-skill"
+                    />
+                    <Button type="button" size="icon" onClick={handleAddSkill} data-testid="button-add-skill">
+                      <Plus className="size-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profile?.skills && profile.skills.length > 0 ? (
+                    profile.skills.map((skill, i) => (
+                      <Badge key={i} variant="secondary" data-testid={`badge-skill-${i}`}>{skill}</Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Henüz beceri eklenmemiş</p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Diller</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>İngilizce</span>
-                <span className="text-muted-foreground">Anadil</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between text-sm">
-                <span>İspanyolca</span>
-                <span className="text-muted-foreground">Orta Seviye</span>
-              </div>
-            </CardContent>
-          </Card>
+          {isEditing && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Hakkında</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  value={editForm.bio || ""}
+                  onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                  placeholder="Kendinizi kısaca tanıtın..."
+                  rows={4}
+                  data-testid="input-bio"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {!isEditing && profile?.bio && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Hakkında</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{profile.bio}</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Main Content */}
@@ -107,57 +329,52 @@ export default function Profile() {
             <TabsList className="w-full justify-start bg-transparent border-b rounded-none h-auto p-0 gap-6">
               <TabsTrigger value="experience" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 px-1">Deneyim</TabsTrigger>
               <TabsTrigger value="education" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 px-1">Eğitim</TabsTrigger>
-              <TabsTrigger value="projects" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 px-1">Projeler</TabsTrigger>
             </TabsList>
             
             <div className="mt-6">
               <TabsContent value="experience" className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="mt-1 bg-primary/10 p-2 rounded-lg h-fit">
-                    <Briefcase className="size-5 text-primary" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-lg">Kıdemli Ürün Tasarımcısı</h3>
-                      <span className="text-sm text-muted-foreground">2021 - Günümüz</span>
+                {profile?.experience && profile.experience.length > 0 ? (
+                  profile.experience.map((exp: any, i: number) => (
+                    <div key={i} className="flex gap-4">
+                      <div className="mt-1 bg-primary/10 p-2 rounded-lg h-fit">
+                        <Briefcase className="size-5 text-primary" />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="font-semibold text-lg">{exp.title}</h3>
+                        <p className="text-primary font-medium">{exp.company}</p>
+                        <p className="text-sm text-muted-foreground">{exp.description}</p>
+                      </div>
                     </div>
-                    <p className="text-primary font-medium">TechCorp A.Ş.</p>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Temel ürün panelinin yeniden tasarımını yönettim, kullanıcı etkileşiminde %20 artış sağladım. 3 kıdemli olmayan tasarımcıdan oluşan bir ekibi yönettim ve şirketin ilk tasarım sistemini kurdum.
-                    </p>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Briefcase className="size-12 mx-auto mb-4 opacity-50" />
+                    <p>Henüz deneyim eklenmemiş</p>
+                    <p className="text-sm">Profil düzenleme ile deneyimlerinizi ekleyin</p>
                   </div>
-                </div>
-                <Separator />
-                <div className="flex gap-4">
-                  <div className="mt-1 bg-muted p-2 rounded-lg h-fit">
-                    <Briefcase className="size-5 text-muted-foreground" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-lg">UI/UX Tasarımcısı</h3>
-                      <span className="text-sm text-muted-foreground">2019 - 2021</span>
-                    </div>
-                    <p className="text-foreground font-medium">Yaratıcı Ajans</p>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Yüksek kaliteli prototipler ve mobil uygulamalar sunmak için çeşitli müşterilerle çalıştım. Kullanıcı testi oturumları düzenledim ve geri bildirimlere göre yinelemeler yaptım.
-                    </p>
-                  </div>
-                </div>
+                )}
               </TabsContent>
 
               <TabsContent value="education" className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="mt-1 bg-primary/10 p-2 rounded-lg h-fit">
-                    <GraduationCap className="size-5 text-primary" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-lg">Etkileşim Tasarımı Lisans Derecesi</h3>
-                      <span className="text-sm text-muted-foreground">2015 - 2019</span>
+                {profile?.education && profile.education.length > 0 ? (
+                  profile.education.map((edu: any, i: number) => (
+                    <div key={i} className="flex gap-4">
+                      <div className="mt-1 bg-primary/10 p-2 rounded-lg h-fit">
+                        <GraduationCap className="size-5 text-primary" />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="font-semibold text-lg">{edu.degree}</h3>
+                        <p className="text-primary font-medium">{edu.school}</p>
+                      </div>
                     </div>
-                    <p className="text-primary font-medium">Tasarım Sanatları Üniversitesi</p>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <GraduationCap className="size-12 mx-auto mb-4 opacity-50" />
+                    <p>Henüz eğitim bilgisi eklenmemiş</p>
+                    <p className="text-sm">Profil düzenleme ile eğitim bilgilerinizi ekleyin</p>
                   </div>
-                </div>
+                )}
               </TabsContent>
             </div>
           </Tabs>
