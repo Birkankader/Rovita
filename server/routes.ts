@@ -13,6 +13,7 @@ import {
 import { z } from "zod";
 import multer from "multer";
 import { parseCVText } from "./cv-parser";
+import { analyzeJobWithAI } from "./job-analyzer";
 
 // Lazy load pdf-parse to handle both ESM (dev) and CJS (prod) environments
 let PDFParseClass: any = null;
@@ -72,52 +73,6 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     return res.status(401).json({ message: "Giriş yapmanız gerekiyor" });
   }
   next();
-}
-
-function analyzeSkillMatch(userSkills: string[], jobDescription: string): {
-  matchScore: number;
-  skillsMatch: string[];
-  skillsGap: string[];
-  recommendations: string;
-} {
-  const jobDescLower = jobDescription.toLowerCase();
-  const commonSkills = [
-    "javascript", "typescript", "react", "node.js", "python", "java", "sql",
-    "html", "css", "git", "docker", "aws", "mongodb", "postgresql", "redis",
-    "graphql", "rest api", "agile", "scrum", "testing", "ci/cd", "kubernetes",
-    "machine learning", "data analysis", "figma", "ui/ux", "communication",
-    "leadership", "problem solving", "teamwork", "project management"
-  ];
-
-  const requiredSkills = commonSkills.filter(skill => 
-    jobDescLower.includes(skill.toLowerCase())
-  );
-
-  const userSkillsLower = userSkills.map(s => s.toLowerCase());
-  const skillsMatch = requiredSkills.filter(skill => 
-    userSkillsLower.some(us => us.includes(skill) || skill.includes(us))
-  );
-  const skillsGap = requiredSkills.filter(skill => 
-    !userSkillsLower.some(us => us.includes(skill) || skill.includes(us))
-  );
-
-  const matchScore = requiredSkills.length > 0 
-    ? Math.round((skillsMatch.length / requiredSkills.length) * 100)
-    : 50;
-
-  let recommendations = "";
-  if (skillsGap.length > 0) {
-    recommendations = `Bu pozisyon için ${skillsGap.slice(0, 3).join(", ")} becerilerini geliştirmenizi öneriyoruz. `;
-  }
-  if (matchScore >= 70) {
-    recommendations += "Profiliniz bu pozisyon için oldukça uygun görünüyor!";
-  } else if (matchScore >= 40) {
-    recommendations += "Bazı eksik becerileri tamamlayarak şansınızı artırabilirsiniz.";
-  } else {
-    recommendations += "Bu pozisyon için daha fazla hazırlık yapmanız gerekebilir.";
-  }
-
-  return { matchScore, skillsMatch, skillsGap, recommendations };
 }
 
 export async function registerRoutes(
@@ -325,9 +280,10 @@ export async function registerRoutes(
 
       const profile = await storage.getProfile(req.session.userId!);
       const userSkills = profile?.skills || [];
+      const userExperience = (profile?.experience as Array<{ title: string; company: string; description: string }>) || [];
 
       const { matchScore, skillsMatch, skillsGap, recommendations } = 
-        analyzeSkillMatch(userSkills, analysisInput.jobDescription);
+        await analyzeJobWithAI(userSkills, userExperience, analysisInput.jobTitle, analysisInput.jobDescription);
 
       const analysis = await storage.createJobAnalysis(req.session.userId!, {
         jobTitle: analysisInput.jobTitle,
