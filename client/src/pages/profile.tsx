@@ -7,13 +7,25 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Mail, Link as LinkIcon, Github, Linkedin, Edit2, Download, GraduationCap, Briefcase, Loader2, Save, X, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { MapPin, Mail, Link as LinkIcon, Github, Linkedin, Edit2, Download, GraduationCap, Briefcase, Loader2, Save, X, Plus, Trash2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+interface Experience {
+  title: string;
+  company: string;
+  description: string;
+}
+
+interface Education {
+  degree: string;
+  school: string;
+}
 
 interface Profile {
   id: string;
@@ -43,10 +55,18 @@ export default function Profile() {
   });
 
   const [editForm, setEditForm] = useState<Partial<Profile>>({});
+  const [showExpDialog, setShowExpDialog] = useState(false);
+  const [showEduDialog, setShowEduDialog] = useState(false);
+  const [newExperience, setNewExperience] = useState<Experience>({ title: "", company: "", description: "" });
+  const [newEducation, setNewEducation] = useState<Education>({ degree: "", school: "" });
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<Profile>) => {
       const res = await apiRequest("PUT", "/api/profile", data);
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: "Profil güncellenirken hata oluştu" }));
+        throw new Error(error.message);
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -54,8 +74,26 @@ export default function Profile() {
       setIsEditing(false);
       toast({ title: "Başarılı", description: "Profil güncellendi." });
     },
-    onError: () => {
-      toast({ title: "Hata", description: "Profil güncellenirken hata oluştu.", variant: "destructive" });
+    onError: (error: Error) => {
+      toast({ title: "Hata", description: error.message || "Profil güncellenirken hata oluştu.", variant: "destructive" });
+    },
+  });
+
+  const updateExperienceEducationMutation = useMutation({
+    mutationFn: async (data: Partial<Profile>) => {
+      const res = await apiRequest("PUT", "/api/profile", data);
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: "Güncellenirken hata oluştu" }));
+        throw new Error(error.message);
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      toast({ title: "Başarılı", description: "Güncellendi." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Hata", description: error.message || "Güncellenirken hata oluştu.", variant: "destructive" });
     },
   });
 
@@ -91,6 +129,46 @@ export default function Profile() {
       ...editForm,
       skills: (editForm.skills || []).filter(s => s !== skillToRemove),
     });
+  };
+
+  const handleAddExperience = () => {
+    if (newExperience.title.trim() && newExperience.company.trim()) {
+      const updatedExperience = [...(profile?.experience || []), newExperience];
+      updateExperienceEducationMutation.mutate(
+        { experience: updatedExperience },
+        {
+          onSuccess: () => {
+            setNewExperience({ title: "", company: "", description: "" });
+            setShowExpDialog(false);
+          },
+        }
+      );
+    }
+  };
+
+  const handleRemoveExperience = (index: number) => {
+    const updatedExperience = (profile?.experience || []).filter((_, i) => i !== index);
+    updateExperienceEducationMutation.mutate({ experience: updatedExperience });
+  };
+
+  const handleAddEducation = () => {
+    if (newEducation.degree.trim() && newEducation.school.trim()) {
+      const updatedEducation = [...(profile?.education || []), newEducation];
+      updateExperienceEducationMutation.mutate(
+        { education: updatedEducation },
+        {
+          onSuccess: () => {
+            setNewEducation({ degree: "", school: "" });
+            setShowEduDialog(false);
+          },
+        }
+      );
+    }
+  };
+
+  const handleRemoveEducation = (index: number) => {
+    const updatedEducation = (profile?.education || []).filter((_, i) => i !== index);
+    updateExperienceEducationMutation.mutate({ education: updatedEducation });
   };
 
   useEffect(() => {
@@ -333,14 +411,79 @@ export default function Profile() {
             
             <div className="mt-6">
               <TabsContent value="experience" className="space-y-6">
+                <div className="flex justify-end">
+                  <Dialog open={showExpDialog} onOpenChange={setShowExpDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" data-testid="button-add-experience">
+                        <Plus className="mr-2 size-4" />
+                        Deneyim Ekle
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Yeni Deneyim Ekle</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="exp-title">Unvan</Label>
+                          <Input
+                            id="exp-title"
+                            value={newExperience.title}
+                            onChange={(e) => setNewExperience({ ...newExperience, title: e.target.value })}
+                            placeholder="Örn: Frontend Geliştirici"
+                            data-testid="input-experience-title"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="exp-company">Şirket</Label>
+                          <Input
+                            id="exp-company"
+                            value={newExperience.company}
+                            onChange={(e) => setNewExperience({ ...newExperience, company: e.target.value })}
+                            placeholder="Örn: ABC Teknoloji"
+                            data-testid="input-experience-company"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="exp-description">Açıklama</Label>
+                          <Textarea
+                            id="exp-description"
+                            value={newExperience.description}
+                            onChange={(e) => setNewExperience({ ...newExperience, description: e.target.value })}
+                            placeholder="Görev ve sorumluluklarınızı yazın..."
+                            data-testid="input-experience-description"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowExpDialog(false)}>İptal</Button>
+                        <Button onClick={handleAddExperience} disabled={updateExperienceEducationMutation.isPending} data-testid="button-save-experience">
+                          {updateExperienceEducationMutation.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                          Kaydet
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
                 {profile?.experience && profile.experience.length > 0 ? (
                   profile.experience.map((exp: any, i: number) => (
-                    <div key={i} className="flex gap-4">
+                    <div key={i} className="flex gap-4 group">
                       <div className="mt-1 bg-primary/10 p-2 rounded-lg h-fit">
                         <Briefcase className="size-5 text-primary" />
                       </div>
-                      <div className="space-y-1">
-                        <h3 className="font-semibold text-lg">{exp.title}</h3>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-start justify-between">
+                          <h3 className="font-semibold text-lg">{exp.title}</h3>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-destructive"
+                            onClick={() => handleRemoveExperience(i)}
+                            data-testid={`button-delete-experience-${i}`}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
                         <p className="text-primary font-medium">{exp.company}</p>
                         <p className="text-sm text-muted-foreground">{exp.description}</p>
                       </div>
@@ -350,20 +493,75 @@ export default function Profile() {
                   <div className="text-center py-8 text-muted-foreground">
                     <Briefcase className="size-12 mx-auto mb-4 opacity-50" />
                     <p>Henüz deneyim eklenmemiş</p>
-                    <p className="text-sm">Profil düzenleme ile deneyimlerinizi ekleyin</p>
+                    <p className="text-sm">Yukarıdaki butonu kullanarak deneyimlerinizi ekleyin</p>
                   </div>
                 )}
               </TabsContent>
 
               <TabsContent value="education" className="space-y-6">
+                <div className="flex justify-end">
+                  <Dialog open={showEduDialog} onOpenChange={setShowEduDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" data-testid="button-add-education">
+                        <Plus className="mr-2 size-4" />
+                        Eğitim Ekle
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Yeni Eğitim Ekle</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edu-degree">Derece</Label>
+                          <Input
+                            id="edu-degree"
+                            value={newEducation.degree}
+                            onChange={(e) => setNewEducation({ ...newEducation, degree: e.target.value })}
+                            placeholder="Örn: Bilgisayar Mühendisliği Lisans"
+                            data-testid="input-education-degree"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="edu-school">Okul</Label>
+                          <Input
+                            id="edu-school"
+                            value={newEducation.school}
+                            onChange={(e) => setNewEducation({ ...newEducation, school: e.target.value })}
+                            placeholder="Örn: İstanbul Teknik Üniversitesi"
+                            data-testid="input-education-school"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowEduDialog(false)}>İptal</Button>
+                        <Button onClick={handleAddEducation} disabled={updateExperienceEducationMutation.isPending} data-testid="button-save-education">
+                          {updateExperienceEducationMutation.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                          Kaydet
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
                 {profile?.education && profile.education.length > 0 ? (
                   profile.education.map((edu: any, i: number) => (
-                    <div key={i} className="flex gap-4">
+                    <div key={i} className="flex gap-4 group">
                       <div className="mt-1 bg-primary/10 p-2 rounded-lg h-fit">
                         <GraduationCap className="size-5 text-primary" />
                       </div>
-                      <div className="space-y-1">
-                        <h3 className="font-semibold text-lg">{edu.degree}</h3>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-start justify-between">
+                          <h3 className="font-semibold text-lg">{edu.degree}</h3>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-destructive"
+                            onClick={() => handleRemoveEducation(i)}
+                            data-testid={`button-delete-education-${i}`}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
                         <p className="text-primary font-medium">{edu.school}</p>
                       </div>
                     </div>
@@ -372,7 +570,7 @@ export default function Profile() {
                   <div className="text-center py-8 text-muted-foreground">
                     <GraduationCap className="size-12 mx-auto mb-4 opacity-50" />
                     <p>Henüz eğitim bilgisi eklenmemiş</p>
-                    <p className="text-sm">Profil düzenleme ile eğitim bilgilerinizi ekleyin</p>
+                    <p className="text-sm">Yukarıdaki butonu kullanarak eğitim bilgilerinizi ekleyin</p>
                   </div>
                 )}
               </TabsContent>

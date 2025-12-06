@@ -27,7 +27,42 @@ export default function Onboarding() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleComplete = () => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleComplete = async () => {
+    // If we have parsed CV data, save it to the profile first
+    if (parsedCV) {
+      setIsSaving(true);
+      try {
+        const response = await fetch("/api/profile", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            jobTitle: parsedCV.jobTitle,
+            bio: parsedCV.bio,
+            skills: parsedCV.skills,
+            experience: parsedCV.experience,
+            education: parsedCV.education,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Profil kaydedilemedi");
+        }
+      } catch (error: any) {
+        toast({
+          title: "Hata",
+          description: error.message || "Profil kaydedilirken bir hata oluştu",
+          variant: "destructive",
+        });
+        setIsSaving(false);
+        return;
+      }
+      setIsSaving(false);
+    }
+
     toast({
       title: "Profil Oluşturuldu!",
       description: "CareerAscend'e hoş geldiniz. İlk işinizi analiz edelim.",
@@ -278,12 +313,17 @@ export default function Onboarding() {
                 <Button 
                   onClick={handleComplete} 
                   className="w-full"
-                  disabled={isParsing || !parsedCV}
+                  disabled={isParsing || isSaving || !parsedCV}
                 >
                   {isParsing ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       İşleniyor...
+                    </>
+                  ) : isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Kaydediliyor...
                     </>
                   ) : (
                     "Profili Oluştur ve Devam Et"
