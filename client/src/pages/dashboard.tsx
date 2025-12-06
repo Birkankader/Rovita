@@ -38,6 +38,14 @@ interface LearningQuest {
   xp: number;
 }
 
+interface JobAnalysis {
+  id: string;
+  jobTitle: string;
+  matchScore: number;
+  skillsMatch: string[];
+  skillsGap: string[];
+}
+
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -54,6 +62,11 @@ export default function Dashboard() {
 
   const { data: quests = [] } = useQuery<LearningQuest[]>({
     queryKey: ["/api/quests"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: jobAnalyses = [] } = useQuery<JobAnalysis[]>({
+    queryKey: ["/api/job-analysis"],
     enabled: isAuthenticated,
   });
 
@@ -83,6 +96,10 @@ export default function Dashboard() {
   const xpProgress = ((totalXp % 500) / 500) * 100;
 
   const skills = profile?.skills || [];
+  
+  const latestAnalysis = jobAnalyses.length > 0 ? jobAnalyses[0] : null;
+  const readinessScore = latestAnalysis ? latestAnalysis.matchScore : 0;
+  
   const skillsData = [
     { name: "Teknik", value: Math.min(skills.length * 10, 100), color: "hsl(var(--chart-1))" },
     { name: "Sosyal Beceriler", value: 45, color: "hsl(var(--chart-2))" },
@@ -128,9 +145,11 @@ export default function Dashboard() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">İş Hazırlık Skoru</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-foreground" data-testid="text-readiness-score">%{Math.min(skills.length * 10 + 20, 100)}</div>
-                <Progress value={Math.min(skills.length * 10 + 20, 100)} className="h-2 mt-3" />
-                <p className="text-xs text-muted-foreground mt-2">Profil bilgilerinize göre</p>
+                <div className="text-3xl font-bold text-foreground" data-testid="text-readiness-score">%{readinessScore}</div>
+                <Progress value={readinessScore} className="h-2 mt-3" />
+                <p className="text-xs text-muted-foreground mt-2">
+                  {latestAnalysis ? `${latestAnalysis.jobTitle} için` : "Henüz iş analizi yapılmadı"}
+                </p>
               </CardContent>
             </Card>
             <Card>
