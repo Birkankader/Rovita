@@ -294,6 +294,31 @@ export async function registerRoutes(
         recommendations,
       });
 
+      // Auto-create learning quests for skill gaps (max 5)
+      if (skillsGap && skillsGap.length > 0) {
+        const existingQuests = await storage.getLearningQuests(req.session.userId!);
+        const existingSkills = new Set(
+          existingQuests.map(q => q.targetSkill.toLowerCase().trim())
+        );
+
+        const questsToCreate = skillsGap
+          .filter(skill => !existingSkills.has(skill.toLowerCase().trim()))
+          .slice(0, 5);
+
+        for (const skill of questsToCreate) {
+          await storage.createLearningQuest(req.session.userId!, {
+            title: `${skill} Öğren`,
+            description: `${analysisInput.jobTitle} pozisyonu için ${skill} becerisini geliştir.`,
+            targetSkill: skill,
+            level: "beginner",
+            status: "pending",
+            progress: 0,
+            xp: 100,
+            tasks: [],
+          });
+        }
+      }
+
       res.status(201).json(analysis);
     } catch (error) {
       if (error instanceof z.ZodError) {
