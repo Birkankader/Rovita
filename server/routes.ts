@@ -29,8 +29,9 @@ async function parsePdfBuffer(buffer: Buffer): Promise<string> {
   // PDFParse is a class that takes options with data property
   const parser = new PDFParseClass({ data: buffer });
   await parser.load();
-  const text = await parser.getText();
-  return text;
+  const result = await parser.getText();
+  // getText returns { text: string, pages: [...], total: number }
+  return result.text || "";
 }
 
 const scryptAsync = promisify(scrypt);
