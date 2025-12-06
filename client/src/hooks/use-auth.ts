@@ -23,6 +23,13 @@ interface RegisterData {
   password: string;
   firstName?: string;
   lastName?: string;
+  cvData?: {
+    jobTitle?: string | null;
+    bio?: string | null;
+    skills?: string[];
+    experience?: Array<{ title: string; company: string; description: string }>;
+    education?: Array<{ degree: string; school: string }>;
+  };
 }
 
 export function useAuth() {

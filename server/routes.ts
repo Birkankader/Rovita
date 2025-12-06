@@ -11,8 +11,25 @@ import {
   insertUserProgressSchema,
 } from "@shared/schema";
 import { z } from "zod";
+import multer from "multer";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
+import { parseCVText } from "./cv-parser";
 
 const scryptAsync = promisify(scrypt);
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === "application/pdf") {
+      cb(null, true);
+    } else {
+      cb(new Error("Sadece PDF dosyaları kabul edilir"));
+    }
+  },
+});
 
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
@@ -93,6 +110,34 @@ export async function registerRoutes(
 
   // ==================== AUTH ROUTES ====================
 
+  // Strict CV data schema for validation with length limits and sanitization
+  const experienceSchema = z.object({
+    title: z.string().transform(s => s.trim()).pipe(z.string().min(1).max(200)),
+    company: z.string().transform(s => s.trim()).pipe(z.string().min(1).max(200)),
+    description: z.string().default("").transform(s => s.trim()).pipe(z.string().max(1000)),
+  });
+
+  const educationSchema = z.object({
+    degree: z.string().transform(s => s.trim()).pipe(z.string().min(1).max(200)),
+    school: z.string().transform(s => s.trim()).pipe(z.string().min(1).max(200)),
+  });
+
+  const cvDataSchema = z.object({
+    jobTitle: z.string().nullable().optional().transform(s => {
+      const trimmed = s?.trim();
+      return trimmed && trimmed.length > 0 ? trimmed.slice(0, 200) : null;
+    }),
+    bio: z.string().nullable().optional().transform(s => {
+      const trimmed = s?.trim();
+      return trimmed && trimmed.length > 0 ? trimmed.slice(0, 2000) : null;
+    }),
+    skills: z.array(
+      z.string().transform(s => s.trim()).pipe(z.string().min(1).max(100))
+    ).max(50).optional().transform(arr => arr?.filter(s => s.length > 0) ?? []),
+    experience: z.array(experienceSchema).max(20).optional().transform(arr => arr ?? []),
+    education: z.array(educationSchema).max(10).optional().transform(arr => arr ?? []),
+  }).optional();
+
   // Register
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
@@ -101,6 +146,7 @@ export async function registerRoutes(
         password: z.string().min(6, "Şifre en az 6 karakter olmalı"),
         firstName: z.string().optional(),
         lastName: z.string().optional(),
+        cvData: cvDataSchema,
       });
 
       const data = registerSchema.parse(req.body);
@@ -118,7 +164,18 @@ export async function registerRoutes(
         lastName: data.lastName || null,
       });
 
-      await storage.createProfile(user.id, {});
+      let profileData = {};
+      if (data.cvData) {
+        profileData = {
+          jobTitle: data.cvData.jobTitle ?? null,
+          bio: data.cvData.bio ?? null,
+          skills: data.cvData.skills ?? [],
+          experience: data.cvData.experience ?? [],
+          education: data.cvData.education ?? [],
+        };
+      }
+
+      await storage.createProfile(user.id, profileData);
       await storage.createUserProgress(user.id);
 
       req.session.userId = user.id;
@@ -443,6 +500,73 @@ export async function registerRoutes(
       }
       console.error("Create assessment error:", error);
       res.status(500).json({ message: "Değerlendirme kaydedilirken hata oluştu" });
+    }
+  });
+
+  // ==================== CV PARSE ROUTES ====================
+
+  // Parse CV and return extracted data
+  app.post("/api/cv/parse", upload.single("cv"), async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "CV dosyası gerekli" });
+      }
+
+      const pdfData = await pdfParse(req.file.buffer);
+      const cvText = pdfData.text;
+
+      if (!cvText || cvText.trim().length < 50) {
+        return res.status(422).json({ 
+          message: "CV dosyasından yeterli metin çıkarılamadı",
+          code: "INVALID_CONTENT"
+        });
+      }
+
+      const result = await parseCVText(cvText);
+      
+      // Return with warnings and degraded flag
+      const responseData = {
+        ...result.data,
+        warnings: result.warnings,
+        degraded: result.degraded,
+      };
+      
+      // Return 206 for degraded/partial content
+      if (result.degraded) {
+        return res.status(206).json({
+          ...responseData,
+          message: "CV'den yeterli bilgi çıkarılamadı. Manuel olarak doldurabilirsiniz.",
+        });
+      }
+      
+      res.json(responseData);
+    } catch (error: any) {
+      console.error("CV parse error:", error);
+      const message = error?.message || "CV işlenirken bir hata oluştu";
+      const code = error?.code;
+      
+      // 503: AI not configured
+      if (message.includes("AI entegrasyonu")) {
+        return res.status(503).json({ message, unavailable: true, code: "AI_UNAVAILABLE" });
+      }
+      
+      // 429: Rate limiting
+      if (code === "RATE_LIMIT" || code === "TIMEOUT") {
+        return res.status(429).json({ message, code });
+      }
+      
+      // 502: Upstream OpenAI error
+      if (code === "UPSTREAM_ERROR") {
+        return res.status(502).json({ message, code });
+      }
+      
+      // 422: Validation/schema failure
+      if (message.includes("doğrulama") || message.includes("validation")) {
+        return res.status(422).json({ message, code: "VALIDATION_ERROR" });
+      }
+      
+      // 500: Unexpected errors
+      res.status(500).json({ message, code: "INTERNAL_ERROR" });
     }
   });
 
