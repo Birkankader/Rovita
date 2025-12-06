@@ -74,23 +74,6 @@ export default function Home() {
         ))}
       </section>
 
-      {/* Social Proof / Stats */}
-      <section className="rounded-3xl bg-secondary/50 p-8 md:p-12 text-center border border-border/50">
-        <h2 className="text-2xl md:text-3xl font-heading font-bold mb-8">Hırslı profesyoneller tarafından güveniliyor</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {[
-            { value: "10k+", label: "Aktif Kullanıcı" },
-            { value: "50k+", label: "Analiz Edilen İş" },
-            { value: "%95", label: "Başarı Oranı" },
-            { value: "7/24", label: "Yapay Zeka Desteği" }
-          ].map((stat, i) => (
-            <div key={i} className="space-y-1">
-              <div className="text-3xl md:text-4xl font-bold text-primary">{stat.value}</div>
-              <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

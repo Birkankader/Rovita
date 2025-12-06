@@ -4,10 +4,12 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, User, Briefcase, LayoutDashboard, Map, LogOut, Settings } from "lucide-react";
 import { useState } from "react";
 import { Notifications } from "./notifications";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
 
   if (location === "/login" || location === "/register") {
     return <>{children}</>;
@@ -47,16 +49,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 {item.label}
               </Link>
             ))}
-            <div className="h-6 w-px bg-border mx-2" />
-            
-            <Notifications />
-            
-            <Link href="/settings">
-              <Button variant="ghost" size="icon" className={isActive("/settings") ? "text-primary bg-muted" : "text-muted-foreground"}>
-                <Settings className="size-5" />
-                <span className="sr-only">Ayarlar</span>
-              </Button>
-            </Link>
+            {user && (
+              <>
+                <div className="h-6 w-px bg-border mx-2" />
+                
+                <Notifications />
+                
+                <Link href="/settings">
+                  <Button variant="ghost" size="icon" className={isActive("/settings") ? "text-primary bg-muted" : "text-muted-foreground"}>
+                    <Settings className="size-5" />
+                    <span className="sr-only">Ayarlar</span>
+                  </Button>
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* Mobile Nav */}
@@ -84,15 +90,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     {item.label}
                   </Link>
                 ))}
-                <div className="h-px bg-border my-2" />
-                <Link 
-                  href="/settings"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-md text-muted-foreground hover:bg-muted transition-colors"
-                >
-                  <Settings className="size-5" />
-                  Ayarlar
-                </Link>
+                {user && (
+                  <>
+                    <div className="h-px bg-border my-2" />
+                    <Link 
+                      href="/settings"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-md text-muted-foreground hover:bg-muted transition-colors"
+                    >
+                      <Settings className="size-5" />
+                      Ayarlar
+                    </Link>
+                  </>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
