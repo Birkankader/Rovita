@@ -383,6 +383,22 @@ export async function registerRoutes(
     }
   });
 
+  // Delete quest (reject)
+  app.delete("/api/quests/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const existingQuest = await storage.getLearningQuest(req.params.id);
+      if (!existingQuest || existingQuest.userId !== req.session.userId) {
+        return res.status(404).json({ message: "Görev bulunamadı" });
+      }
+
+      await storage.deleteLearningQuest(req.params.id);
+      res.json({ message: "Görev silindi" });
+    } catch (error) {
+      console.error("Delete quest error:", error);
+      res.status(500).json({ message: "Görev silinirken hata oluştu" });
+    }
+  });
+
   // Update quest
   app.put("/api/quests/:id", requireAuth, async (req: Request, res: Response) => {
     try {

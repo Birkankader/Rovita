@@ -3,17 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckCircle2, BrainCircuit, Plus, Loader2, Target } from "lucide-react";
+import { CheckCircle2, BrainCircuit, Loader2, Target, X, Briefcase } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
 interface QuestTask {
   id: string;
@@ -45,14 +41,7 @@ export default function Roadmap() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
-  const [newQuest, setNewQuest] = useState({
-    title: "",
-    description: "",
-    targetSkill: "",
-    xp: 100,
-  });
 
   const { data: quests = [], isLoading: questsLoading } = useQuery<LearningQuest[]>({
     queryKey: ["/api/quests"],
@@ -62,26 +51,6 @@ export default function Roadmap() {
   const { data: progress } = useQuery<UserProgress>({
     queryKey: ["/api/progress"],
     enabled: isAuthenticated,
-  });
-
-  const createQuestMutation = useMutation({
-    mutationFn: async (quest: typeof newQuest) => {
-      const res = await apiRequest("POST", "/api/quests", {
-        ...quest,
-        status: "active",
-        progress: 0,
-      });
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
-      setIsDialogOpen(false);
-      setNewQuest({ title: "", description: "", targetSkill: "", xp: 100 });
-      toast({ title: "Başarılı", description: "Yeni görev oluşturuldu." });
-    },
-    onError: () => {
-      toast({ title: "Hata", description: "Görev oluşturulurken hata oluştu.", variant: "destructive" });
-    },
   });
 
   const updateQuestMutation = useMutation({
@@ -107,6 +76,23 @@ export default function Roadmap() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/progress"] });
+    },
+  });
+
+  const rejectQuestMutation = useMutation({
+    mutationFn: async (questId: string) => {
+      const res = await apiRequest("DELETE", `/api/quests/${questId}`);
+      return res.json();
+    },
+    onSuccess: (_, questId) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
+      if (questId === selectedQuestId) {
+        setSelectedQuestId(null);
+      }
+      toast({ title: "Görev reddedildi", description: "Görev listenizden kaldırıldı." });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Görev reddedilirken hata oluştu.", variant: "destructive" });
     },
   });
 
@@ -202,74 +188,6 @@ export default function Roadmap() {
         <div className="lg:col-span-1 space-y-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-muted-foreground uppercase text-xs tracking-wider">Görevleriniz</h3>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" variant="outline" className="gap-1" data-testid="button-add-quest">
-                  <Plus className="size-4" />
-                  Yeni Görev
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Yeni Görev Oluştur</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Görev Başlığı</Label>
-                    <Input
-                      id="title"
-                      value={newQuest.title}
-                      onChange={(e) => setNewQuest({ ...newQuest, title: e.target.value })}
-                      placeholder="React Hooks Öğren"
-                      data-testid="input-quest-title"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="targetSkill">Hedef Beceri</Label>
-                    <Input
-                      id="targetSkill"
-                      value={newQuest.targetSkill}
-                      onChange={(e) => setNewQuest({ ...newQuest, targetSkill: e.target.value })}
-                      placeholder="React"
-                      data-testid="input-quest-skill"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Açıklama</Label>
-                    <Textarea
-                      id="description"
-                      value={newQuest.description}
-                      onChange={(e) => setNewQuest({ ...newQuest, description: e.target.value })}
-                      placeholder="Bu görevi tamamlayarak ne öğreneceğinizi açıklayın..."
-                      data-testid="input-quest-description"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="xp">XP Ödülü</Label>
-                    <Input
-                      id="xp"
-                      type="number"
-                      value={newQuest.xp}
-                      onChange={(e) => setNewQuest({ ...newQuest, xp: parseInt(e.target.value) || 0 })}
-                      min={10}
-                      max={1000}
-                      data-testid="input-quest-xp"
-                    />
-                  </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => createQuestMutation.mutate(newQuest)}
-                    disabled={!newQuest.title || !newQuest.targetSkill || createQuestMutation.isPending}
-                    data-testid="button-create-quest"
-                  >
-                    {createQuestMutation.isPending ? (
-                      <Loader2 className="mr-2 size-4 animate-spin" />
-                    ) : null}
-                    Görevi Oluştur
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
 
           {activeQuests.length === 0 ? (
@@ -277,12 +195,22 @@ export default function Roadmap() {
               <Target className="size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h4 className="font-semibold mb-2">Henüz görev yok</h4>
               <p className="text-sm text-muted-foreground mb-4">
-                İlk görevinizi oluşturarak öğrenme yolculuğunuza başlayın.
+                İş ilanı analiz ederek veya sosyal beceri testi çözerek görevler kazanabilirsiniz.
               </p>
-              <Button onClick={() => setIsDialogOpen(true)} data-testid="button-create-first-quest">
-                <Plus className="mr-2 size-4" />
-                İlk Görevi Oluştur
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Link href="/analyze">
+                  <Button className="w-full" data-testid="button-go-analyze">
+                    <Briefcase className="mr-2 size-4" />
+                    İş İlanı Analiz Et
+                  </Button>
+                </Link>
+                <Link href="/assessment">
+                  <Button variant="outline" className="w-full" data-testid="button-go-assessment">
+                    <BrainCircuit className="mr-2 size-4" />
+                    Sosyal Beceri Testi
+                  </Button>
+                </Link>
+              </div>
             </Card>
           ) : (
             activeQuests.map((quest) => {
@@ -312,7 +240,21 @@ export default function Roadmap() {
                       >
                         {quest.status === "active" ? "Devam Ediyor" : "Bekliyor"}
                       </Badge>
-                      <span className="text-xs font-bold text-accent">+{quest.xp} XP</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-accent">+{quest.xp} XP</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            rejectQuestMutation.mutate(quest.id);
+                          }}
+                          disabled={rejectQuestMutation.isPending}
+                          className="text-muted-foreground hover:text-destructive transition-colors p-1 -mr-1"
+                          title="Görevi Reddet"
+                          data-testid={`button-reject-quest-${quest.id}`}
+                        >
+                          <X className="size-4" />
+                        </button>
+                      </div>
                     </div>
                     <h4 className="font-bold mb-1">{quest.title}</h4>
                     <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
@@ -467,12 +409,14 @@ export default function Roadmap() {
                 <Target className="size-16 mx-auto mb-4 text-muted-foreground opacity-30" />
                 <h3 className="text-xl font-semibold mb-2">Bir görev seçin</h3>
                 <p className="text-muted-foreground mb-4">
-                  Sol taraftan bir görev seçin veya yeni bir görev oluşturun.
+                  Sol taraftan bir görev seçin veya iş ilanı analizi yaparak yeni görevler kazanın.
                 </p>
-                <Button onClick={() => setIsDialogOpen(true)} data-testid="button-create-quest-empty">
-                  <Plus className="mr-2 size-4" />
-                  Yeni Görev Oluştur
-                </Button>
+                <Link href="/analyze">
+                  <Button data-testid="button-go-analyze-empty">
+                    <Briefcase className="mr-2 size-4" />
+                    İş İlanı Analiz Et
+                  </Button>
+                </Link>
               </div>
             </Card>
           )}

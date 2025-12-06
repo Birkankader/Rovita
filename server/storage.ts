@@ -43,6 +43,7 @@ export interface IStorage {
   getLearningQuest(id: string): Promise<LearningQuest | undefined>;
   createLearningQuest(userId: string, quest: InsertLearningQuest): Promise<LearningQuest>;
   updateLearningQuest(id: string, quest: Partial<InsertLearningQuest>): Promise<LearningQuest | undefined>;
+  deleteLearningQuest(id: string): Promise<void>;
   
   // User Progress operations
   getUserProgress(userId: string): Promise<UserProgress | undefined>;
@@ -145,6 +146,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(learningQuests.id, id))
       .returning();
     return quest || undefined;
+  }
+
+  async deleteLearningQuest(id: string): Promise<void> {
+    await db.delete(learningQuests).where(eq(learningQuests.id, id));
   }
 
   // User Progress operations
