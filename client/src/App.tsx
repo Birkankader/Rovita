@@ -13,12 +13,16 @@ import Roadmap from "@/pages/roadmap";
 import Assessment from "@/pages/assessment";
 import Profile from "@/pages/profile";
 import Settings from "@/pages/settings";
+import Login from "@/pages/login";
+import Register from "@/pages/register";
 
 function Router() {
   return (
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/job-analysis" component={JobAnalysis} />

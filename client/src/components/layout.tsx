@@ -9,6 +9,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
+  if (location === "/login" || location === "/register") {
+    return <>{children}</>;
+  }
+
   const navItems = [
     { label: "Panel", href: "/dashboard", icon: LayoutDashboard },
     { label: "İş Analizi", href: "/job-analysis", icon: Briefcase },
