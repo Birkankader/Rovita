@@ -1,0 +1,95 @@
+import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, User, Briefcase, LayoutDashboard, Map, LogOut } from "lucide-react";
+import { useState } from "react";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const [location] = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navItems = [
+    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { label: "Job Analysis", href: "/job-analysis", icon: Briefcase },
+    { label: "Roadmap", href: "/roadmap", icon: Map },
+    { label: "Profile", href: "/onboarding", icon: User },
+  ];
+
+  const isActive = (path: string) => location === path;
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background font-sans text-foreground">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <Link href="/">
+            <a className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight hover:opacity-80 transition-opacity">
+              <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                <Briefcase className="size-5" />
+              </div>
+              <span>CareerAscend</span>
+            </a>
+          </Link>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-6">
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href}>
+                <a
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    isActive(item.href) ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  {item.label}
+                </a>
+              </Link>
+            ))}
+            <div className="h-6 w-px bg-border mx-2" />
+            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+              <LogOut className="size-4" />
+              Sign Out
+            </Button>
+          </nav>
+
+          {/* Mobile Nav */}
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="size-5" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <nav className="flex flex-col gap-4 mt-8">
+                {navItems.map((item) => (
+                  <Link key={item.href} href={item.href}>
+                    <a
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
+                        isActive(item.href)
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <item.icon className="size-5" />
+                      {item.label}
+                    </a>
+                  </Link>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </header>
+
+      <main className="flex-1 container mx-auto px-4 py-6 md:py-10">
+        {children}
+      </main>
+
+      <footer className="border-t py-8 bg-muted/30">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} CareerAscend. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}

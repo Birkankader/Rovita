@@ -1,0 +1,96 @@
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+import { ArrowRight, CheckCircle2, Target, Trophy, Upload } from "lucide-react";
+import heroImage from "@assets/generated_images/abstract_career_growth_visualization.png";
+
+export default function Home() {
+  return (
+    <div className="flex flex-col gap-16 md:gap-24 pb-16">
+      {/* Hero Section */}
+      <section className="flex flex-col md:flex-row items-center gap-10 md:gap-16 pt-8 md:pt-16">
+        <div className="flex-1 space-y-6">
+          <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium text-primary bg-primary/5">
+            <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
+            AI-Powered Career Growth
+          </div>
+          <h1 className="text-4xl md:text-6xl font-heading font-bold leading-[1.1] text-foreground">
+            Bridge the Gap to Your <span className="text-primary">Dream Job</span>
+          </h1>
+          <p className="text-lg text-muted-foreground md:text-xl max-w-[600px] leading-relaxed">
+            Analyze your skills against real job descriptions, identify gaps, and follow a gamified roadmap to career success.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <Link href="/onboarding">
+              <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40 hover:-translate-y-0.5">
+                Get Started
+                <ArrowRight className="ml-2 size-5" />
+              </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+                View Demo
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <div className="flex-1 relative w-full aspect-square md:aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-border/50 bg-muted/20">
+             <img 
+            src={heroImage} 
+            alt="Career Growth Visualization" 
+            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent pointer-events-none" />
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="grid md:grid-cols-3 gap-8">
+        {[
+          {
+            icon: Upload,
+            title: "Smart Profile Import",
+            desc: "Instantly create your profile from LinkedIn or by parsing your existing resume."
+          },
+          {
+            icon: Target,
+            title: "Skill Gap Analysis",
+            desc: "Paste any job description to see exactly what skills you're missing and how to get them."
+          },
+          {
+            icon: Trophy,
+            title: "Gamified Roadmap",
+            desc: "Turn career development into a game with XP, levels, and daily learning quests."
+          }
+        ].map((feature, i) => (
+          <div key={i} className="group p-6 rounded-xl border bg-card hover:shadow-lg transition-all duration-300 hover:border-primary/20">
+            <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
+              <feature.icon className="size-6" />
+            </div>
+            <h3 className="text-xl font-heading font-semibold mb-2">{feature.title}</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              {feature.desc}
+            </p>
+          </div>
+        ))}
+      </section>
+
+      {/* Social Proof / Stats */}
+      <section className="rounded-3xl bg-secondary/50 p-8 md:p-12 text-center border border-border/50">
+        <h2 className="text-2xl md:text-3xl font-heading font-bold mb-8">Trusted by ambitious professionals</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { value: "10k+", label: "Active Users" },
+            { value: "50k+", label: "Jobs Analyzed" },
+            { value: "95%", label: "Success Rate" },
+            { value: "24/7", label: "AI Guidance" }
+          ].map((stat, i) => (
+            <div key={i} className="space-y-1">
+              <div className="text-3xl md:text-4xl font-bold text-primary">{stat.value}</div>
+              <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
