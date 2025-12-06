@@ -1,0 +1,88 @@
+2025-12-06 21:16:52.44
+0c4fd1b0
+System
+metasidecar: loaded enterprise status from environment is_enterprise=false
+2025-12-06 21:16:52.44
+0c4fd1b0
+System
+forwarding local port 5000 to external port 80 (mapped as 1104)
+2025-12-06 21:16:53.79
+0c4fd1b0
+User
+> rest-express@1.0.0 start
+2025-12-06 21:16:53.79
+0c4fd1b0
+User
+> NODE_ENV=production node dist/index.cjs
+2025-12-06 21:16:54.09
+0c4fd1b0
+User
+6:16:53 PM [express] serving on port 5000
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+at Pn.handle_request (/home/runner/workspace/dist/index.cjs:38:3170)
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+at /home/runner/workspace/dist/index.cjs:38:7929
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+at qn.dispatch (/home/runner/workspace/dist/index.cjs:38:5049)
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+at /home/runner/workspace/dist/index.cjs:70:107328
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+at /home/runner/workspace/dist/index.cjs:70:114114
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+at Pn.handle_request (/home/runner/workspace/dist/index.cjs:38:3170)
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+Get user error: TypeError: Cannot read properties of undefined (reading 'userId')
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+at u (/home/runner/workspace/dist/index.cjs:38:5250)
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+at Pr.process_params (/home/runner/workspace/dist/index.cjs:38:8474)
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+at b (/home/runner/workspace/dist/index.cjs:38:7877)
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+at Pn.handle_request (/home/runner/workspace/dist/index.cjs:38:3170)
+2025-12-06 21:17:09.43
+0c4fd1b0
+User
+6:17:09 PM [express] GET /api/auth/me 500 in 4ms :: {"message":"Kullanıcı bilgisi alınırken hata oluştu"}
+2025-12-06 21:18:35.25
+0c4fd1b0
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-12-06 21:18:35.25
+0c4fd1b0
+User
+Register error: TypeError: Cannot set properties of undefined (setting 'userId')
+2025-12-06 21:18:35.25
+0c4fd1b0
+User
+at /home/runner/workspace/dist/index.cjs:70:106365
+2025-12-06 21:18:35.25
+0c4fd1b0
+User
+6:18:35 PM [express] POST /api/auth/register 500 in 846ms :: {"message":"Kayıt sırasında bir hata oluştu"}
+2025-12-06 21:18:35.25
+0c4fd1b0
+User
+6:18:35 PM [express] POST /api/auth/register 500 in 846ms :: {"message":"Kayıt sırasında bir hata oluştu"}
