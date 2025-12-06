@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Briefcase, CheckCircle2, XCircle, AlertCircle, ArrowRight, Loader2, Link as LinkIcon, Info } from "lucide-react";
+import { Briefcase, CheckCircle2, XCircle, AlertCircle, ArrowRight, Loader2, Link as LinkIcon, Info, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -57,6 +57,28 @@ export default function JobAnalysis() {
       setShowUrlWarning(false);
     }
   };
+
+  const fetchUrlMutation = useMutation({
+    mutationFn: async (url: string) => {
+      const res = await apiRequest("POST", "/api/job-analysis/fetch-url", { url });
+      return res.json() as Promise<{ jobTitle: string; jobDescription: string; message: string }>;
+    },
+    onSuccess: (data) => {
+      if (data.jobTitle) {
+        setJobTitle(data.jobTitle);
+      }
+      setJobDescription(data.jobDescription);
+      setShowUrlWarning(false);
+      toast({ title: "Başarılı!", description: data.message });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "İçerik alınamadı", 
+        description: "Bu site otomatik çekmeyi desteklemiyor. Lütfen ilanı manuel olarak kopyalayıp yapıştırın.", 
+        variant: "destructive" 
+      });
+    },
+  });
 
   const analyzeMutation = useMutation({
     mutationFn: async (data: { jobTitle: string; jobDescription: string; jobUrl?: string }) => {
@@ -138,20 +160,44 @@ export default function JobAnalysis() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="jobUrl">İlan Linki (Opsiyonel)</Label>
-                <div className="relative">
-                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                  <Input 
-                    id="jobUrl"
-                    className="pl-9"
-                    placeholder="ör. https://linkedin.com/jobs/..."
-                    value={jobUrl}
-                    onChange={(e) => setJobUrl(e.target.value)}
-                    data-testid="input-joburl"
-                  />
+                <Label htmlFor="jobUrl">İlan Linki</Label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input 
+                      id="jobUrl"
+                      className="pl-9"
+                      placeholder="ör. https://kariyer.net/is-ilani/..."
+                      value={jobUrl}
+                      onChange={(e) => setJobUrl(e.target.value)}
+                      data-testid="input-joburl"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      if (!jobUrl.trim()) {
+                        toast({ title: "Hata", description: "Lütfen bir URL girin", variant: "destructive" });
+                        return;
+                      }
+                      fetchUrlMutation.mutate(jobUrl);
+                    }}
+                    disabled={fetchUrlMutation.isPending || !jobUrl.trim()}
+                    data-testid="button-fetch-url"
+                  >
+                    {fetchUrlMutation.isPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Download className="size-4 mr-1" />
+                        Getir
+                      </>
+                    )}
+                  </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Referans olarak ilanın linkini ekleyebilirsiniz.
+                  İlan linkini girin ve "Getir" butonuna tıklayarak içeriği otomatik çekin.
                 </p>
               </div>
               <div className="space-y-2">

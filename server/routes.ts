@@ -14,6 +14,7 @@ import { z } from "zod";
 import multer from "multer";
 import { parseCVText } from "./cv-parser";
 import { analyzeJobWithAI, generateQuestTasks } from "./job-analyzer";
+import * as cheerio from "cheerio";
 
 // Lazy load pdf-parse to handle both ESM (dev) and CJS (prod) environments
 let PDFParseClass: any = null;
@@ -269,6 +270,154 @@ export async function registerRoutes(
   });
 
   // ==================== JOB ANALYSIS ROUTES ====================
+
+  // Allowed job posting domains for URL fetching (SSRF protection)
+  const allowedJobDomains = [
+    "linkedin.com",
+    "www.linkedin.com",
+    "kariyer.net",
+    "www.kariyer.net",
+    "indeed.com",
+    "www.indeed.com",
+    "tr.indeed.com",
+    "glassdoor.com",
+    "www.glassdoor.com",
+    "secretcv.com",
+    "www.secretcv.com",
+    "yenibiris.com",
+    "www.yenibiris.com",
+    "eleman.net",
+    "www.eleman.net",
+    "monster.com",
+    "www.monster.com",
+    "stepstone.com",
+    "www.stepstone.com",
+  ];
+
+  // Fetch job content from URL
+  app.post("/api/job-analysis/fetch-url", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { url } = z.object({
+        url: z.string().url("Geçerli bir URL girin"),
+      }).parse(req.body);
+
+      // Security: Parse and validate URL
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(url);
+      } catch {
+        return res.status(400).json({ message: "Geçersiz URL formatı" });
+      }
+
+      // Security: Only allow HTTPS
+      if (parsedUrl.protocol !== "https:") {
+        return res.status(400).json({ message: "Sadece HTTPS URL'leri desteklenmektedir" });
+      }
+
+      // Security: Check against allowed domains
+      const hostname = parsedUrl.hostname.toLowerCase();
+      const isAllowedDomain = allowedJobDomains.some(domain => 
+        hostname === domain || hostname.endsWith(`.${domain}`)
+      );
+
+      if (!isAllowedDomain) {
+        return res.status(400).json({ 
+          message: "Bu site desteklenmiyor. Desteklenen siteler: LinkedIn, Kariyer.net, Indeed, Glassdoor, SecretCV, Yenibiris, Eleman.net" 
+        });
+      }
+
+      // Security: Add timeout with AbortController
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        return res.status(400).json({ message: "URL'den içerik alınamadı. Lütfen ilanı manuel olarak yapıştırın." });
+      }
+
+      const html = await response.text();
+      const $ = cheerio.load(html);
+
+      // Remove scripts, styles, nav, header, footer
+      $("script, style, nav, header, footer, iframe, noscript, svg, img").remove();
+
+      // Try to extract job title
+      let jobTitle = "";
+      const titleSelectors = [
+        "h1",
+        "[class*='job-title']",
+        "[class*='jobTitle']",
+        "[class*='position-title']",
+        "[data-testid='jobTitle']",
+        ".jobs-unified-top-card__job-title",
+      ];
+      for (const selector of titleSelectors) {
+        const el = $(selector).first();
+        if (el.length && el.text().trim()) {
+          jobTitle = el.text().trim().slice(0, 200);
+          break;
+        }
+      }
+
+      // Try to extract job description from common containers
+      let jobDescription = "";
+      const descriptionSelectors = [
+        "[class*='job-description']",
+        "[class*='jobDescription']",
+        "[class*='description']",
+        "[data-testid='jobDescription']",
+        ".jobs-description__content",
+        ".job-details",
+        "article",
+        "main",
+        ".content",
+      ];
+
+      for (const selector of descriptionSelectors) {
+        const el = $(selector).first();
+        if (el.length) {
+          const text = el.text().replace(/\s+/g, " ").trim();
+          if (text.length > 100) {
+            jobDescription = text.slice(0, 10000);
+            break;
+          }
+        }
+      }
+
+      // Fallback to body text if no specific container found
+      if (!jobDescription || jobDescription.length < 100) {
+        jobDescription = $("body").text().replace(/\s+/g, " ").trim().slice(0, 10000);
+      }
+
+      if (!jobDescription || jobDescription.length < 50) {
+        return res.status(400).json({ 
+          message: "İlan içeriği çekilemedi. Bu site otomatik çekmeyi desteklemiyor olabilir. Lütfen ilanı manuel olarak kopyalayıp yapıştırın." 
+        });
+      }
+
+      res.json({ 
+        jobTitle: jobTitle || "",
+        jobDescription,
+        message: jobTitle ? "İlan içeriği başarıyla çekildi" : "İlan içeriği çekildi ancak başlık bulunamadı. Lütfen kontrol edin."
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error("Fetch URL error:", error);
+      res.status(500).json({ message: "URL'den içerik alınırken hata oluştu. Lütfen ilanı manuel olarak yapıştırın." });
+    }
+  });
 
   // Create job analysis
   app.post("/api/job-analysis", requireAuth, async (req: Request, res: Response) => {
