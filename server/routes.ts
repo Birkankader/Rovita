@@ -20,19 +20,19 @@ async function getPdfParse() {
   if (pdfParseModule) return pdfParseModule;
   
   try {
-    // Try dynamic import first (works in both ESM and modern Node.js)
+    // Dynamic import for pdf-parse
     const module = await import("pdf-parse");
-    pdfParseModule = module.default || module;
+    // pdf-parse exports PDFParse as the main function
+    pdfParseModule = (module as any).PDFParse || (module as any).default?.PDFParse || module.default || module;
+    
+    if (typeof pdfParseModule !== 'function') {
+      throw new Error("Could not find pdf-parse function in module");
+    }
+    
     return pdfParseModule;
   } catch (e) {
-    // Fallback for CJS environments
-    try {
-      pdfParseModule = require("pdf-parse");
-      return pdfParseModule;
-    } catch (e2) {
-      console.error("Failed to load pdf-parse:", e2);
-      throw new Error("PDF parsing module not available");
-    }
+    console.error("Failed to load pdf-parse:", e);
+    throw new Error("PDF parsing module not available");
   }
 }
 
