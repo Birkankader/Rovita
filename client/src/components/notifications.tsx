@@ -15,33 +15,33 @@ export function Notifications() {
   const notifications = [
     {
       id: 1,
-      title: "Don't lose your streak!",
-      message: "You haven't completed a task today. Log in to keep your 3-day streak alive.",
-      time: "2 hours ago",
+      title: "Serini kaybetme!",
+      message: "Bugün bir görev tamamlamadın. 3 günlük serini canlı tutmak için giriş yap.",
+      time: "2 saat önce",
       type: "streak",
       unread: true
     },
     {
       id: 2,
-      title: "New Quest Available",
-      message: "A new quest 'Mastering CSS Grid' has been added to your roadmap.",
-      time: "5 hours ago",
+      title: "Yeni Görev Mevcut",
+      message: "Yol haritana 'CSS Grid'de Ustalaşma' adlı yeni bir görev eklendi.",
+      time: "5 saat önce",
       type: "quest",
       unread: true
     },
     {
       id: 3,
-      title: "Level Up!",
-      message: "Congratulations! You've reached Level 5. Check out your new badge.",
-      time: "1 day ago",
+      title: "Seviye Atladın!",
+      message: "Tebrikler! Seviye 5'e ulaştın. Yeni rozetine göz at.",
+      time: "1 gün önce",
       type: "achievement",
       unread: true
     },
     {
       id: 4,
-      title: "System Update",
-      message: "We've improved the job analysis algorithm for better accuracy.",
-      time: "2 days ago",
+      title: "Sistem Güncellemesi",
+      message: "Daha iyi doğruluk için iş analizi algoritmasını geliştirdik.",
+      time: "2 gün önce",
       type: "system",
       unread: false
     }
@@ -64,8 +64,8 @@ export function Notifications() {
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="p-4 flex items-center justify-between">
-          <h4 className="font-semibold leading-none">Notifications</h4>
-          <span className="text-xs text-muted-foreground">Mark all as read</span>
+          <h4 className="font-semibold leading-none">Bildirimler</h4>
+          <span className="text-xs text-muted-foreground">Tümünü okundu işaretle</span>
         </div>
         <Separator />
         <ScrollArea className="h-[300px]">
@@ -99,7 +99,7 @@ export function Notifications() {
         <Separator />
         <div className="p-2">
           <Button variant="ghost" size="sm" className="w-full text-xs h-8 gap-1">
-            View all notifications
+            Tüm bildirimleri gör
             <ArrowRight className="size-3" />
           </Button>
         </div>

@@ -21,16 +21,16 @@ export default function Profile() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <h1 className="text-2xl font-heading font-bold">Alex Designer</h1>
-                  <p className="text-muted-foreground font-medium">Senior Product Designer</p>
+                  <p className="text-muted-foreground font-medium">Kıdemli Ürün Tasarımcısı</p>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm">
                     <Download className="mr-2 size-4" />
-                    Download CV
+                    CV İndir
                   </Button>
                   <Button size="sm">
                     <Edit2 className="mr-2 size-4" />
-                    Edit Profile
+                    Profili Düzenle
                   </Button>
                 </div>
               </div>
@@ -68,16 +68,16 @@ export default function Profile() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Skills</CardTitle>
+              <CardTitle className="text-lg">Beceriler</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">Figma</Badge>
                 <Badge variant="secondary">React</Badge>
                 <Badge variant="secondary">TypeScript</Badge>
-                <Badge variant="secondary">User Research</Badge>
-                <Badge variant="secondary">Prototyping</Badge>
-                <Badge variant="secondary">Design Systems</Badge>
+                <Badge variant="secondary">Kullanıcı Araştırması</Badge>
+                <Badge variant="secondary">Prototipleme</Badge>
+                <Badge variant="secondary">Tasarım Sistemleri</Badge>
                 <Badge variant="secondary">HTML/CSS</Badge>
               </div>
             </CardContent>
@@ -85,17 +85,17 @@ export default function Profile() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Languages</CardTitle>
+              <CardTitle className="text-lg">Diller</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>English</span>
-                <span className="text-muted-foreground">Native</span>
+                <span>İngilizce</span>
+                <span className="text-muted-foreground">Anadil</span>
               </div>
               <Separator />
               <div className="flex justify-between text-sm">
-                <span>Spanish</span>
-                <span className="text-muted-foreground">Intermediate</span>
+                <span>İspanyolca</span>
+                <span className="text-muted-foreground">Orta Seviye</span>
               </div>
             </CardContent>
           </Card>
@@ -105,9 +105,9 @@ export default function Profile() {
         <div className="md:col-span-2 space-y-6">
           <Tabs defaultValue="experience" className="w-full">
             <TabsList className="w-full justify-start bg-transparent border-b rounded-none h-auto p-0 gap-6">
-              <TabsTrigger value="experience" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 px-1">Experience</TabsTrigger>
-              <TabsTrigger value="education" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 px-1">Education</TabsTrigger>
-              <TabsTrigger value="projects" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 px-1">Projects</TabsTrigger>
+              <TabsTrigger value="experience" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 px-1">Deneyim</TabsTrigger>
+              <TabsTrigger value="education" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 px-1">Eğitim</TabsTrigger>
+              <TabsTrigger value="projects" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 px-1">Projeler</TabsTrigger>
             </TabsList>
             
             <div className="mt-6">
@@ -118,12 +118,12 @@ export default function Profile() {
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-lg">Senior Product Designer</h3>
-                      <span className="text-sm text-muted-foreground">2021 - Present</span>
+                      <h3 className="font-semibold text-lg">Kıdemli Ürün Tasarımcısı</h3>
+                      <span className="text-sm text-muted-foreground">2021 - Günümüz</span>
                     </div>
-                    <p className="text-primary font-medium">TechCorp Inc.</p>
+                    <p className="text-primary font-medium">TechCorp A.Ş.</p>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Led the redesign of the core product dashboard, resulting in a 20% increase in user engagement. Managed a team of 3 junior designers and established the company's first design system.
+                      Temel ürün panelinin yeniden tasarımını yönettim, kullanıcı etkileşiminde %20 artış sağladım. 3 kıdemli olmayan tasarımcıdan oluşan bir ekibi yönettim ve şirketin ilk tasarım sistemini kurdum.
                     </p>
                   </div>
                 </div>
@@ -134,12 +134,12 @@ export default function Profile() {
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-lg">UI/UX Designer</h3>
+                      <h3 className="font-semibold text-lg">UI/UX Tasarımcısı</h3>
                       <span className="text-sm text-muted-foreground">2019 - 2021</span>
                     </div>
-                    <p className="text-foreground font-medium">Creative Agency</p>
+                    <p className="text-foreground font-medium">Yaratıcı Ajans</p>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Worked with various clients to deliver high-fidelity prototypes and mobile applications. Conducted user testing sessions and iterated based on feedback.
+                      Yüksek kaliteli prototipler ve mobil uygulamalar sunmak için çeşitli müşterilerle çalıştım. Kullanıcı testi oturumları düzenledim ve geri bildirimlere göre yinelemeler yaptım.
                     </p>
                   </div>
                 </div>
@@ -152,10 +152,10 @@ export default function Profile() {
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-lg">Bachelor of Science in Interaction Design</h3>
+                      <h3 className="font-semibold text-lg">Etkileşim Tasarımı Lisans Derecesi</h3>
                       <span className="text-sm text-muted-foreground">2015 - 2019</span>
                     </div>
-                    <p className="text-primary font-medium">University of Design Arts</p>
+                    <p className="text-primary font-medium">Tasarım Sanatları Üniversitesi</p>
                   </div>
                 </div>
               </TabsContent>

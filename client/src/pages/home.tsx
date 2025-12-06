@@ -11,24 +11,24 @@ export default function Home() {
         <div className="flex-1 space-y-6">
           <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium text-primary bg-primary/5">
             <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
-            AI-Powered Career Growth
+            Yapay Zeka Destekli Kariyer Gelişimi
           </div>
           <h1 className="text-4xl md:text-6xl font-heading font-bold leading-[1.1] text-foreground">
-            Bridge the Gap to Your <span className="text-primary">Dream Job</span>
+            Hayalinizdeki İşe Giden <span className="text-primary">Köprüyü Kurun</span>
           </h1>
           <p className="text-lg text-muted-foreground md:text-xl max-w-[600px] leading-relaxed">
-            Analyze your skills against real job descriptions, identify gaps, and follow a gamified roadmap to career success.
+            Becerilerinizi gerçek iş tanımlarıyla karşılaştırın, eksiklerinizi belirleyin ve kariyer başarısı için oyunlaştırılmış bir yol haritasını takip edin.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Link href="/onboarding">
               <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40 hover:-translate-y-0.5">
-                Get Started
+                Hemen Başla
                 <ArrowRight className="ml-2 size-5" />
               </Button>
             </Link>
             <Link href="/dashboard">
               <Button size="lg" variant="outline" className="h-12 px-8 text-base">
-                View Demo
+                Demoyu İncele
               </Button>
             </Link>
           </div>
@@ -36,7 +36,7 @@ export default function Home() {
         <div className="flex-1 relative w-full aspect-square md:aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-border/50 bg-muted/20">
              <img 
             src={heroImage} 
-            alt="Career Growth Visualization" 
+            alt="Kariyer Gelişim Görselleştirmesi" 
             className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent pointer-events-none" />
@@ -48,18 +48,18 @@ export default function Home() {
         {[
           {
             icon: Upload,
-            title: "Smart Profile Import",
-            desc: "Instantly create your profile from LinkedIn or by parsing your existing resume."
+            title: "Akıllı Profil İçe Aktarma",
+            desc: "LinkedIn'den veya mevcut özgeçmişinizi yükleyerek profilinizi anında oluşturun."
           },
           {
             icon: Target,
-            title: "Skill Gap Analysis",
-            desc: "Paste any job description to see exactly what skills you're missing and how to get them."
+            title: "Beceri Açığı Analizi",
+            desc: "Eksik becerilerinizi ve bunları nasıl kazanacağınızı görmek için herhangi bir iş ilanını yapıştırın."
           },
           {
             icon: Trophy,
-            title: "Gamified Roadmap",
-            desc: "Turn career development into a game with XP, levels, and daily learning quests."
+            title: "Oyunlaştırılmış Yol Haritası",
+            desc: "Kariyer gelişimini XP, seviyeler ve günlük öğrenme görevleriyle bir oyuna dönüştürün."
           }
         ].map((feature, i) => (
           <div key={i} className="group p-6 rounded-xl border bg-card hover:shadow-lg transition-all duration-300 hover:border-primary/20">
@@ -76,13 +76,13 @@ export default function Home() {
 
       {/* Social Proof / Stats */}
       <section className="rounded-3xl bg-secondary/50 p-8 md:p-12 text-center border border-border/50">
-        <h2 className="text-2xl md:text-3xl font-heading font-bold mb-8">Trusted by ambitious professionals</h2>
+        <h2 className="text-2xl md:text-3xl font-heading font-bold mb-8">Hırslı profesyoneller tarafından güveniliyor</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { value: "10k+", label: "Active Users" },
-            { value: "50k+", label: "Jobs Analyzed" },
-            { value: "95%", label: "Success Rate" },
-            { value: "24/7", label: "AI Guidance" }
+            { value: "10k+", label: "Aktif Kullanıcı" },
+            { value: "50k+", label: "Analiz Edilen İş" },
+            { value: "%95", label: "Başarı Oranı" },
+            { value: "7/24", label: "Yapay Zeka Desteği" }
           ].map((stat, i) => (
             <div key={i} className="space-y-1">
               <div className="text-3xl md:text-4xl font-bold text-primary">{stat.value}</div>

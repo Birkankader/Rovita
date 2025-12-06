@@ -14,8 +14,8 @@ export default function Onboarding() {
 
   const handleComplete = () => {
     toast({
-      title: "Profile Created!",
-      description: "Welcome to CareerAscend. Let's analyze your first job.",
+      title: "Profil Oluşturuldu!",
+      description: "CareerAscend'e hoş geldiniz. İlk işinizi analiz edelim.",
     });
     setLocation("/dashboard");
   };
@@ -23,23 +23,23 @@ export default function Onboarding() {
   return (
     <div className="max-w-3xl mx-auto py-8 space-y-8">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-heading font-bold">Create Your Profile</h1>
-        <p className="text-muted-foreground">Choose how you want to import your professional data.</p>
+        <h1 className="text-3xl font-heading font-bold">Profilinizi Oluşturun</h1>
+        <p className="text-muted-foreground">Profesyonel verilerinizi nasıl içe aktarmak istediğinizi seçin.</p>
       </div>
 
       <Tabs defaultValue="linkedin" className="w-full">
         <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 rounded-xl">
           <TabsTrigger value="linkedin" className="py-3 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all">
             <Linkedin className="size-4" />
-            LinkedIn Import
+            LinkedIn İçe Aktar
           </TabsTrigger>
           <TabsTrigger value="resume" className="py-3 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all">
             <FileText className="size-4" />
-            Upload CV
+            CV Yükle
           </TabsTrigger>
           <TabsTrigger value="manual" className="py-3 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all">
             <User className="size-4" />
-            Manual Entry
+            Manuel Giriş
           </TabsTrigger>
         </TabsList>
 
@@ -47,9 +47,9 @@ export default function Onboarding() {
           <TabsContent value="linkedin">
             <Card>
               <CardHeader>
-                <CardTitle>Connect LinkedIn</CardTitle>
+                <CardTitle>LinkedIn ile Bağlan</CardTitle>
                 <CardDescription>
-                  We'll import your experience, education, and skills directly from your LinkedIn profile.
+                  Deneyiminizi, eğitiminizi ve becerilerinizi doğrudan LinkedIn profilinizden içe aktaracağız.
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
@@ -57,10 +57,10 @@ export default function Onboarding() {
                   <Linkedin className="size-8" />
                 </div>
                 <Button onClick={handleComplete} size="lg" className="bg-[#0077b5] hover:bg-[#0077b5]/90 text-white w-full max-w-xs">
-                  Sign in with LinkedIn
+                  LinkedIn ile Giriş Yap
                 </Button>
                 <p className="text-xs text-muted-foreground text-center max-w-sm">
-                  By connecting, you agree to allow CareerAscend to access your public profile data.
+                  Bağlanarak, CareerAscend'in herkese açık profil verilerinize erişmesine izin vermiş olursunuz.
                 </p>
               </CardContent>
             </Card>
@@ -69,9 +69,9 @@ export default function Onboarding() {
           <TabsContent value="resume">
             <Card>
               <CardHeader>
-                <CardTitle>Upload Resume</CardTitle>
+                <CardTitle>Özgeçmiş Yükle</CardTitle>
                 <CardDescription>
-                  Upload your PDF or DOCX resume and our AI will parse it into a structured profile.
+                  PDF veya DOCX formatındaki özgeçmişinizi yükleyin, yapay zekamız onu yapılandırılmış bir profile dönüştürsün.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -80,14 +80,14 @@ export default function Onboarding() {
                     <Upload className="size-6" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-medium">Click to upload or drag and drop</p>
-                    <p className="text-sm text-muted-foreground">PDF, DOCX up to 10MB</p>
+                    <p className="font-medium">Yüklemek için tıklayın veya sürükleyip bırakın</p>
+                    <p className="text-sm text-muted-foreground">PDF, DOCX (maksimum 10MB)</p>
                   </div>
                 </div>
               </CardContent>
               <CardFooter>
                 <Button onClick={handleComplete} className="w-full">
-                  Process Resume
+                  Özgeçmişi İşle
                 </Button>
               </CardFooter>
             </Card>
@@ -96,34 +96,34 @@ export default function Onboarding() {
           <TabsContent value="manual">
             <Card>
               <CardHeader>
-                <CardTitle>Manual Profile Entry</CardTitle>
+                <CardTitle>Manuel Profil Girişi</CardTitle>
                 <CardDescription>
-                  Fill out your details manually to create your profile.
+                  Profilinizi oluşturmak için bilgilerinizi manuel olarak girin.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First name</Label>
-                    <Input id="firstName" placeholder="Jane" />
+                    <Label htmlFor="firstName">Ad</Label>
+                    <Input id="firstName" placeholder="Adınız" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last name</Label>
-                    <Input id="lastName" placeholder="Doe" />
+                    <Label htmlFor="lastName">Soyad</Label>
+                    <Input id="lastName" placeholder="Soyadınız" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="title">Current Job Title</Label>
-                  <Input id="title" placeholder="e.g. Frontend Developer" />
+                  <Label htmlFor="title">Mevcut İş Unvanı</Label>
+                  <Input id="title" placeholder="ör. Frontend Geliştirici" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="bio">Professional Summary</Label>
-                  <Textarea id="bio" placeholder="Briefly describe your experience..." />
+                  <Label htmlFor="bio">Profesyonel Özet</Label>
+                  <Textarea id="bio" placeholder="Deneyiminizi kısaca açıklayın..." />
                 </div>
               </CardContent>
               <CardFooter>
                 <Button onClick={handleComplete} className="w-full gap-2">
-                  Create Profile
+                  Profil Oluştur
                   <ArrowRight className="size-4" />
                 </Button>
               </CardFooter>

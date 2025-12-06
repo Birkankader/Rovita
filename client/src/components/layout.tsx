@@ -10,11 +10,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Job Analysis", href: "/job-analysis", icon: Briefcase },
-    { label: "Roadmap", href: "/roadmap", icon: Map },
-    { label: "Assessment", href: "/assessment", icon: User },
-    { label: "Profile", href: "/profile", icon: User },
+    { label: "Panel", href: "/dashboard", icon: LayoutDashboard },
+    { label: "İş Analizi", href: "/job-analysis", icon: Briefcase },
+    { label: "Yol Haritası", href: "/roadmap", icon: Map },
+    { label: "Değerlendirme", href: "/assessment", icon: User },
+    { label: "Profil", href: "/profile", icon: User },
   ];
 
   const isActive = (path: string) => location === path;
@@ -52,7 +52,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/settings">
               <Button variant="ghost" size="icon" className={isActive("/settings") ? "text-primary bg-muted" : "text-muted-foreground"}>
                 <Settings className="size-5" />
-                <span className="sr-only">Settings</span>
+                <span className="sr-only">Ayarlar</span>
               </Button>
             </Link>
           </nav>
@@ -62,7 +62,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
                 <Menu className="size-5" />
-                <span className="sr-only">Toggle menu</span>
+                <span className="sr-only">Menüyü Aç</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
@@ -89,7 +89,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     className="flex items-center gap-3 px-4 py-3 rounded-md text-muted-foreground hover:bg-muted transition-colors"
                   >
                     <Settings className="size-5" />
-                    Settings
+                    Ayarlar
                   </a>
                 </Link>
               </nav>
@@ -104,7 +104,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <footer className="border-t py-8 bg-muted/30">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} CareerAscend. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} CareerAscend. Tüm hakları saklıdır.</p>
         </div>
       </footer>
     </div>

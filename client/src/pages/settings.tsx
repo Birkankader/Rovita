@@ -23,16 +23,16 @@ export default function Settings() {
 
   const handleSave = () => {
     toast({
-      title: "Preferences Saved",
-      description: "We'll notify you according to your new schedule.",
+      title: "Tercihler Kaydedildi",
+      description: "Sizi yeni programınıza göre bilgilendireceğiz.",
     });
   };
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-heading font-bold">Settings & Preferences</h1>
-        <p className="text-muted-foreground">Manage how and when you want to be notified.</p>
+        <h1 className="text-3xl font-heading font-bold">Ayarlar & Tercihler</h1>
+        <p className="text-muted-foreground">Bildirimlerinizi nasıl ve ne zaman almak istediğinizi yönetin.</p>
       </div>
 
       <div className="grid gap-6">
@@ -41,17 +41,17 @@ export default function Settings() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Bell className="size-5 text-primary" />
-              <CardTitle>Notification Schedule</CardTitle>
+              <CardTitle>Bildirim Zamanlaması</CardTitle>
             </div>
             <CardDescription>
-              Stay motivated with timely reminders to complete your daily quests.
+              Günlük görevlerinizi tamamlamak için zamanında hatırlatıcılarla motive kalın.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between space-x-2">
               <div className="space-y-0.5">
-                <Label htmlFor="notifications">Enable Reminders</Label>
-                <p className="text-sm text-muted-foreground">Receive push notifications for pending tasks</p>
+                <Label htmlFor="notifications">Hatırlatıcıları Etkinleştir</Label>
+                <p className="text-sm text-muted-foreground">Bekleyen görevler için anlık bildirimler alın</p>
               </div>
               <Switch 
                 id="notifications" 
@@ -62,7 +62,7 @@ export default function Settings() {
 
             {notificationsEnabled && (
               <div className="space-y-4 pt-4 border-t animate-in slide-in-from-top-2 fade-in duration-300">
-                <Label>Preferred Time of Day</Label>
+                <Label>Tercih Edilen Gün Zamanı</Label>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div 
                     onClick={() => toggleTime("morning")}
@@ -74,8 +74,8 @@ export default function Settings() {
                       <Sunrise className="size-6" />
                     </div>
                     <div className="text-center">
-                      <div className="font-semibold">Morning</div>
-                      <div className="text-xs text-muted-foreground">09:00 AM</div>
+                      <div className="font-semibold">Sabah</div>
+                      <div className="text-xs text-muted-foreground">09:00</div>
                     </div>
                   </div>
 
@@ -89,8 +89,8 @@ export default function Settings() {
                       <Sun className="size-6" />
                     </div>
                     <div className="text-center">
-                      <div className="font-semibold">Afternoon</div>
-                      <div className="text-xs text-muted-foreground">01:00 PM</div>
+                      <div className="font-semibold">Öğleden Sonra</div>
+                      <div className="text-xs text-muted-foreground">13:00</div>
                     </div>
                   </div>
 
@@ -104,8 +104,8 @@ export default function Settings() {
                       <Moon className="size-6" />
                     </div>
                     <div className="text-center">
-                      <div className="font-semibold">Evening</div>
-                      <div className="text-xs text-muted-foreground">06:00 PM</div>
+                      <div className="font-semibold">Akşam</div>
+                      <div className="text-xs text-muted-foreground">18:00</div>
                     </div>
                   </div>
                 </div>
@@ -119,17 +119,17 @@ export default function Settings() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Mail className="size-5 text-primary" />
-              <CardTitle>Channels</CardTitle>
+              <CardTitle>Kanallar</CardTitle>
             </div>
-            <CardDescription>Where should we send your updates?</CardDescription>
+            <CardDescription>Güncellemelerinizi nereye gönderelim?</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
              <div className="flex items-center justify-between p-3 border rounded-lg">
               <div className="flex items-center gap-3">
                 <Mail className="size-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Email Digests</p>
-                  <p className="text-xs text-muted-foreground">Weekly progress summary</p>
+                  <p className="font-medium">E-posta Özetleri</p>
+                  <p className="text-xs text-muted-foreground">Haftalık ilerleme özeti</p>
                 </div>
               </div>
               <Switch defaultChecked />
@@ -138,15 +138,15 @@ export default function Settings() {
               <div className="flex items-center gap-3">
                 <Smartphone className="size-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Mobile Push</p>
-                  <p className="text-xs text-muted-foreground">Instant quest updates</p>
+                  <p className="font-medium">Mobil Bildirim</p>
+                  <p className="text-xs text-muted-foreground">Anlık görev güncellemeleri</p>
                 </div>
               </div>
               <Switch defaultChecked />
             </div>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleSave} className="ml-auto">Save Changes</Button>
+            <Button onClick={handleSave} className="ml-auto">Değişiklikleri Kaydet</Button>
           </CardFooter>
         </Card>
       </div>

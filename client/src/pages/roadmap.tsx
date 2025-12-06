@@ -10,36 +10,36 @@ export default function Roadmap() {
   const quests = [
     {
       id: 1,
-      title: "Design Systems Mastery",
-      description: "Learn how to build and maintain scalable design systems in Figma.",
-      level: "Intermediate",
+      title: "Tasarım Sistemleri Ustalığı",
+      description: "Figma'da ölçeklenebilir tasarım sistemleri oluşturmayı ve sürdürmeyi öğrenin.",
+      level: "Orta Seviye",
       xp: 500,
       status: "active",
       progress: 35,
       tasks: [
-        { id: 101, title: "Course: Atomic Design Principles", type: "video", duration: "45 min", completed: true },
-        { id: 102, title: "Workshop: Building Component Libraries", type: "workshop", duration: "2 hours", completed: false },
-        { id: 103, title: "Project: Create a Button System", type: "project", duration: "1 hour", completed: false },
+        { id: 101, title: "Kurs: Atomik Tasarım Prensipleri", type: "video", duration: "45 dk", completed: true },
+        { id: 102, title: "Atölye: Bileşen Kütüphaneleri Oluşturma", type: "atölye", duration: "2 saat", completed: false },
+        { id: 103, title: "Proje: Bir Buton Sistemi Oluştur", type: "proje", duration: "1 saat", completed: false },
       ]
     },
     {
       id: 2,
-      title: "User Research Fundamentals",
-      description: "Understand user needs through qualitative and quantitative research methods.",
-      level: "Beginner",
+      title: "Kullanıcı Araştırması Temelleri",
+      description: "Nitel ve nicel araştırma yöntemleriyle kullanıcı ihtiyaçlarını anlayın.",
+      level: "Başlangıç",
       xp: 350,
       status: "locked",
       progress: 0,
       tasks: [
-        { id: 201, title: "Reading: The Mom Test", type: "book", duration: "3 hours", completed: false },
-        { id: 202, title: "Quiz: Research Methodologies", type: "quiz", duration: "15 min", completed: false },
+        { id: 201, title: "Okuma: The Mom Test", type: "kitap", duration: "3 saat", completed: false },
+        { id: 202, title: "Test: Araştırma Metodolojileri", type: "test", duration: "15 dk", completed: false },
       ]
     },
     {
       id: 3,
-      title: "Leadership for Designers",
-      description: "Soft skills training for communicating design decisions to stakeholders.",
-      level: "Advanced",
+      title: "Tasarımcılar için Liderlik",
+      description: "Tasarım kararlarını paydaşlara iletmek için sosyal beceri eğitimi.",
+      level: "İleri Seviye",
       xp: 800,
       status: "locked",
       progress: 0,
@@ -51,26 +51,26 @@ export default function Roadmap() {
     <div className="max-w-5xl mx-auto space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-heading font-bold">Your Development Roadmap</h1>
-          <p className="text-muted-foreground">Gamified learning path customized to your skill gaps.</p>
+          <h1 className="text-3xl font-heading font-bold">Gelişim Yol Haritanız</h1>
+          <p className="text-muted-foreground">Beceri açıklarınıza göre özelleştirilmiş oyunlaştırılmış öğrenme yolu.</p>
         </div>
         <div className="flex gap-4">
           <Link href="/assessment">
             <Button variant="outline" className="gap-2 border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:text-orange-800">
               <BrainCircuit className="size-4" />
-              Take Soft Skills Test
+              Sosyal Beceri Testini Çöz
             </Button>
           </Link>
           <Card className="px-4 py-2 border-accent/20 bg-accent/5">
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-xs font-medium text-muted-foreground">Total XP</p>
+                <p className="text-xs font-medium text-muted-foreground">Toplam XP</p>
                 <p className="font-bold text-accent text-lg">4,250</p>
               </div>
               <div className="h-8 w-px bg-border"></div>
               <div className="text-right">
-                <p className="text-xs font-medium text-muted-foreground">Streak</p>
-                <p className="font-bold text-foreground text-lg">🔥 3 Days</p>
+                <p className="text-xs font-medium text-muted-foreground">Seri</p>
+                <p className="font-bold text-foreground text-lg">🔥 3 Gün</p>
               </div>
             </div>
           </Card>
@@ -80,7 +80,7 @@ export default function Roadmap() {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Sidebar: Quest List */}
         <div className="lg:col-span-1 space-y-4">
-          <h3 className="font-semibold text-muted-foreground uppercase text-xs tracking-wider mb-2">Available Quests</h3>
+          <h3 className="font-semibold text-muted-foreground uppercase text-xs tracking-wider mb-2">Mevcut Görevler</h3>
           {quests.map((quest) => (
             <div 
               key={quest.id} 
@@ -92,7 +92,7 @@ export default function Roadmap() {
             >
               <div className="flex justify-between items-start mb-2">
                 <Badge variant={quest.status === 'active' ? 'default' : 'secondary'} className={quest.status === 'active' ? 'bg-primary' : ''}>
-                  {quest.status === 'active' ? 'In Progress' : 'Locked'}
+                  {quest.status === 'active' ? 'Devam Ediyor' : 'Kilitli'}
                 </Badge>
                 <span className="text-xs font-bold text-accent">+{quest.xp} XP</span>
               </div>
@@ -102,7 +102,7 @@ export default function Roadmap() {
               {quest.status === 'active' && (
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span>{quest.progress}% Complete</span>
+                    <span>%{quest.progress} Tamamlandı</span>
                   </div>
                   <Progress value={quest.progress} className="h-1.5" />
                 </div>
@@ -110,7 +110,7 @@ export default function Roadmap() {
               {quest.status === 'locked' && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
                   <Lock className="size-3" />
-                  Requires Level 4
+                  Seviye 4 Gerektirir
                 </div>
               )}
             </div>
@@ -123,15 +123,15 @@ export default function Roadmap() {
             <CardHeader className="bg-primary/5 border-b border-primary/10">
               <div className="flex justify-between items-start">
                 <div>
-                  <Badge variant="outline" className="mb-2 border-primary/30 text-primary bg-primary/5">Current Quest</Badge>
-                  <CardTitle className="text-2xl">Design Systems Mastery</CardTitle>
+                  <Badge variant="outline" className="mb-2 border-primary/30 text-primary bg-primary/5">Mevcut Görev</Badge>
+                  <CardTitle className="text-2xl">Tasarım Sistemleri Ustalığı</CardTitle>
                   <CardDescription className="mt-2">
-                    Master the art of creating scalable UI libraries. This quest targets your "Design Systems" skill gap identified in your last job scan.
+                    Ölçeklenebilir UI kütüphaneleri oluşturma sanatında ustalaşın. Bu görev, son iş taramanızda belirlenen "Tasarım Sistemleri" beceri açığını hedefler.
                   </CardDescription>
                 </div>
                 <div className="hidden md:block">
                   <div className="size-16 rounded-full bg-background border-4 border-primary/20 flex items-center justify-center text-primary font-bold text-xl shadow-inner">
-                    35%
+                    %35
                   </div>
                 </div>
               </div>
@@ -139,7 +139,7 @@ export default function Roadmap() {
             <CardContent className="p-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Circle className="size-2 fill-current text-primary" />
-                Quest Steps
+                Görev Adımları
               </h3>
               
               <div className="space-y-4">
@@ -166,7 +166,7 @@ export default function Roadmap() {
                           <Clock className="size-3" /> {task.duration}
                         </span>
                         {!task.completed && (
-                          <span className="text-primary font-medium group-hover:underline cursor-pointer">Start Task →</span>
+                          <span className="text-primary font-medium group-hover:underline cursor-pointer">Görevi Başlat →</span>
                         )}
                       </div>
                     </div>
@@ -177,10 +177,10 @@ export default function Roadmap() {
               <div className="mt-8 p-4 bg-accent/5 rounded-lg border border-accent/10">
                 <h4 className="font-semibold text-accent mb-2 flex items-center gap-2">
                   <Users className="size-4" />
-                  Community Tip
+                  Topluluk İpucu
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  "The 'Atomic Design Principles' video is a game changer. Make sure to take notes on the molecule structure!" — Sarah J., Product Designer
+                  "'Atomik Tasarım Prensipleri' videosu oyunun kurallarını değiştiriyor. Molekül yapısı hakkında not almayı unutmayın!" — Sarah J., Ürün Tasarımcısı
                 </p>
               </div>
             </CardContent>
