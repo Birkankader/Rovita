@@ -1,8 +1,8 @@
-# CareerAscend - Job Preparation Platform
+# Rotiva - Kariyer Gelişim Platformu
 
 ## Overview
 
-CareerAscend is a gamified career development platform that helps users bridge the gap between their current skills and their dream jobs. The application analyzes job descriptions, identifies skill gaps, and creates personalized learning roadmaps with an engaging, game-like progression system.
+Rotiva is a gamified career development platform that helps users bridge the gap between their current skills and their dream jobs. The application analyzes job descriptions, identifies skill gaps, and creates personalized learning roadmaps with an engaging, game-like progression system.
 
 **Core Features:**
 - Job posting analysis and skill gap identification

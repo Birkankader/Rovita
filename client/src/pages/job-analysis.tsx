@@ -30,6 +30,7 @@ export default function JobAnalysis() {
   const { toast } = useToast();
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  const [jobUrl, setJobUrl] = useState("");
   const [result, setResult] = useState<JobAnalysis | null>(null);
   const [showUrlWarning, setShowUrlWarning] = useState(false);
 
@@ -58,7 +59,7 @@ export default function JobAnalysis() {
   };
 
   const analyzeMutation = useMutation({
-    mutationFn: async (data: { jobTitle: string; jobDescription: string }) => {
+    mutationFn: async (data: { jobTitle: string; jobDescription: string; jobUrl?: string }) => {
       const res = await apiRequest("POST", "/api/job-analysis", data);
       return res.json() as Promise<JobAnalysis>;
     },
@@ -102,7 +103,7 @@ export default function JobAnalysis() {
       toast({ title: "Hata", description: "Lütfen iş unvanı ve açıklama girin", variant: "destructive" });
       return;
     }
-    analyzeMutation.mutate({ jobTitle, jobDescription });
+    analyzeMutation.mutate({ jobTitle, jobDescription, jobUrl: jobUrl || undefined });
   };
 
   const criticalGaps = result?.skillsGap?.slice(0, 3) || [];
@@ -135,6 +136,23 @@ export default function JobAnalysis() {
                   onChange={(e) => setJobTitle(e.target.value)}
                   data-testid="input-jobtitle"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="jobUrl">İlan Linki (Opsiyonel)</Label>
+                <div className="relative">
+                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input 
+                    id="jobUrl"
+                    className="pl-9"
+                    placeholder="ör. https://linkedin.com/jobs/..."
+                    value={jobUrl}
+                    onChange={(e) => setJobUrl(e.target.value)}
+                    data-testid="input-joburl"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Referans olarak ilanın linkini ekleyebilirsiniz.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="jobDescription">Açıklama</Label>

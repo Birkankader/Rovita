@@ -31,7 +31,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
               <Briefcase className="size-5" />
             </div>
-            <span>CareerAscend</span>
+            <span>Rotiva</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -105,7 +105,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <footer className="border-t py-8 bg-muted/30">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} CareerAscend. Tüm hakları saklıdır.</p>
+          <p>&copy; {new Date().getFullYear()} Rotiva. Tüm hakları saklıdır.</p>
         </div>
       </footer>
     </div>

@@ -173,7 +173,7 @@ export default function Register() {
               <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
                 <Briefcase className="size-5" />
               </div>
-              CareerAscend
+              Rotiva
             </Link>
             <h1 className="text-3xl font-heading font-bold">Hesap Oluşturun</h1>
             <p className="text-muted-foreground">Kariyer hedeflerinize ulaşmak için ilk adımı atın.</p>

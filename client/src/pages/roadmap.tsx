@@ -319,7 +319,14 @@ export default function Roadmap() {
 
                 {selectedQuest.tasks && selectedQuest.tasks.length > 0 && (
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Alt Görevler</h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Alt Görevler</h3>
+                      {selectedQuest.status === "pending" && (
+                        <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-200">
+                          Göreve başlayarak alt görevleri tamamlayabilirsiniz
+                        </span>
+                      )}
+                    </div>
                     {selectedQuest.tasks.map((task) => (
                       <div 
                         key={task.id} 
@@ -337,7 +344,7 @@ export default function Roadmap() {
                                 completed: !!checked,
                               });
                             }}
-                            disabled={toggleTaskMutation.isPending || selectedQuest.status === "completed"}
+                            disabled={toggleTaskMutation.isPending || selectedQuest.status === "completed" || selectedQuest.status === "pending"}
                             data-testid={`checkbox-task-${selectedQuest.id}-${task.id}`}
                           />
                           <div className="flex-1">

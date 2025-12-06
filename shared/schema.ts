@@ -32,6 +32,7 @@ export const jobAnalyses = pgTable("job_analyses", {
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   jobTitle: text("job_title").notNull(),
   jobDescription: text("job_description").notNull(),
+  jobUrl: text("job_url"),
   matchScore: integer("match_score").notNull(),
   skillsMatch: text("skills_match").array().default(sql`ARRAY[]::text[]`),
   skillsGap: text("skills_gap").array().default(sql`ARRAY[]::text[]`),

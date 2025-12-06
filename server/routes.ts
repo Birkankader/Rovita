@@ -276,6 +276,7 @@ export async function registerRoutes(
       const analysisInput = z.object({
         jobTitle: z.string().min(1, "İş unvanı gerekli"),
         jobDescription: z.string().min(10, "İş açıklaması en az 10 karakter olmalı"),
+        jobUrl: z.string().optional(),
       }).parse(req.body);
 
       const profile = await storage.getProfile(req.session.userId!);
@@ -288,6 +289,7 @@ export async function registerRoutes(
       const analysis = await storage.createJobAnalysis(req.session.userId!, {
         jobTitle: analysisInput.jobTitle,
         jobDescription: analysisInput.jobDescription,
+        jobUrl: analysisInput.jobUrl || null,
         matchScore,
         skillsMatch,
         skillsGap,
