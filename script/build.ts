@@ -23,7 +23,6 @@ const allowlist = [
   "openai",
   "passport",
   "passport-local",
-  "pdf-parse",
   "pg",
   "stripe",
   "uuid",
@@ -55,6 +54,14 @@ async function buildAll() {
     outfile: "dist/index.cjs",
     define: {
       "process.env.NODE_ENV": '"production"',
+    },
+    banner: {
+      js: `
+// Polyfill for import.meta in CJS bundle
+if (typeof globalThis !== 'undefined' && !globalThis.require) {
+  globalThis.require = require;
+}
+`,
     },
     minify: true,
     external: externals,

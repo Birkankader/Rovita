@@ -12,10 +12,20 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
-import * as pdfParseModule from "pdf-parse";
+import { createRequire } from "module";
+import { fileURLToPath } from "url";
 import { parseCVText } from "./cv-parser";
 
-const pdfParse = (pdfParseModule as any).default || pdfParseModule;
+// Handle both ESM (dev) and CJS (prod) environments for pdf-parse
+let pdfParse: any;
+if (typeof import.meta.url !== "undefined") {
+  // ESM mode (development with tsx)
+  const requireModule = createRequire(import.meta.url);
+  pdfParse = requireModule("pdf-parse");
+} else {
+  // CJS mode (production bundle) - use global require
+  pdfParse = (globalThis as any).require?.("pdf-parse") || eval('require')("pdf-parse");
+}
 
 const scryptAsync = promisify(scrypt);
 
