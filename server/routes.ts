@@ -13,7 +13,7 @@ import {
 import { z } from "zod";
 import multer from "multer";
 import { parseCVText } from "./cv-parser";
-import { analyzeJobWithAI } from "./job-analyzer";
+import { analyzeJobWithAI, generateQuestTasks } from "./job-analyzer";
 
 // Lazy load pdf-parse to handle both ESM (dev) and CJS (prod) environments
 let PDFParseClass: any = null;
@@ -306,15 +306,16 @@ export async function registerRoutes(
           .slice(0, 5);
 
         for (const skill of questsToCreate) {
+          const { tasks, description } = await generateQuestTasks(skill, analysisInput.jobTitle);
           await storage.createLearningQuest(req.session.userId!, {
             title: `${skill} Öğren`,
-            description: `${analysisInput.jobTitle} pozisyonu için ${skill} becerisini geliştir.`,
+            description,
             targetSkill: skill,
             level: "beginner",
             status: "pending",
             progress: 0,
             xp: 100,
-            tasks: [],
+            tasks,
           });
         }
       }

@@ -188,3 +188,123 @@ function fallbackAnalysis(userSkills: string[], jobDescription: string): JobAnal
 
   return { matchScore, skillsMatch, skillsGap, recommendations };
 }
+
+export interface QuestTask {
+  id: string;
+  title: string;
+  description: string;
+  completed: boolean;
+}
+
+const questTasksSchema = z.object({
+  tasks: z.array(z.object({
+    title: z.string(),
+    description: z.string(),
+  })).default([]),
+  questDescription: z.string().default(""),
+});
+
+export async function generateQuestTasks(
+  skill: string,
+  jobTitle: string
+): Promise<{ tasks: QuestTask[]; description: string }> {
+  if (!process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || !process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+    return fallbackQuestTasks(skill, jobTitle);
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1",
+      messages: [
+        {
+          role: "system",
+          content: `Sen bir kariyer koçusun. Kullanıcının belirli bir beceriyi öğrenmesi için adım adım bir öğrenme planı oluştur.
+
+Görevin:
+1. Beceriyi öğrenmek için 4-6 somut, uygulanabilir alt görev oluştur
+2. Her görev spesifik ve ölçülebilir olmalı
+3. Görevler sıralı ve mantıklı bir ilerleme izlemeli (temelden ileri seviyeye)
+4. Her görev için kısa ama açıklayıcı bir başlık ve detaylı açıklama yaz
+5. Türkçe yanıt ver
+
+JSON formatında yanıt ver:
+{
+  "questDescription": "Bu beceriyi neden ve nasıl öğreneceğinize dair kısa bir açıklama",
+  "tasks": [
+    {"title": "Görev başlığı", "description": "Görevin nasıl yapılacağına dair detaylı açıklama"},
+    ...
+  ]
+}`
+        },
+        {
+          role: "user",
+          content: `Hedef Pozisyon: ${jobTitle}
+Öğrenilecek Beceri: ${skill}
+
+Bu beceriyi öğrenmek için adım adım bir öğrenme planı oluştur.`
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_completion_tokens: 1000,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      return fallbackQuestTasks(skill, jobTitle);
+    }
+
+    const rawParsed = JSON.parse(content);
+    const validated = questTasksSchema.safeParse(rawParsed);
+    
+    if (!validated.success) {
+      return fallbackQuestTasks(skill, jobTitle);
+    }
+
+    const tasks: QuestTask[] = validated.data.tasks.map((t, idx) => ({
+      id: `task-${idx + 1}`,
+      title: t.title,
+      description: t.description,
+      completed: false,
+    }));
+
+    return {
+      tasks,
+      description: validated.data.questDescription || `${jobTitle} pozisyonu için ${skill} becerisini geliştir.`,
+    };
+  } catch (error: any) {
+    console.error("Quest tasks generation error:", error);
+    return fallbackQuestTasks(skill, jobTitle);
+  }
+}
+
+function fallbackQuestTasks(skill: string, jobTitle: string): { tasks: QuestTask[]; description: string } {
+  return {
+    description: `${jobTitle} pozisyonu için ${skill} becerisini adım adım öğrenin.`,
+    tasks: [
+      {
+        id: "task-1",
+        title: `${skill} temellerini araştır`,
+        description: `${skill} hakkında temel kavramları, terminolojiyi ve kullanım alanlarını öğrenin. Online kaynaklar, dokümantasyon ve tanıtım videoları izleyin.`,
+        completed: false,
+      },
+      {
+        id: "task-2",
+        title: "Online kurs veya tutorial başlat",
+        description: `${skill} için ücretsiz veya ücretli bir online kurs bulun (Udemy, Coursera, YouTube). Düzenli olarak takip edin.`,
+        completed: false,
+      },
+      {
+        id: "task-3",
+        title: "Pratik proje oluştur",
+        description: `Öğrendiklerinizi pekiştirmek için küçük bir pratik proje yapın. Gerçek dünya senaryolarını simüle edin.`,
+        completed: false,
+      },
+      {
+        id: "task-4",
+        title: "Portföy için proje geliştir",
+        description: `${skill} kullanarak portfolyonuza ekleyebileceğiniz daha kapsamlı bir proje geliştirin.`,
+        completed: false,
+      },
+    ],
+  };
+}
