@@ -15,25 +15,22 @@ import multer from "multer";
 import { parseCVText } from "./cv-parser";
 
 // Lazy load pdf-parse to handle both ESM (dev) and CJS (prod) environments
-let pdfParseModule: any = null;
-async function getPdfParse() {
-  if (pdfParseModule) return pdfParseModule;
-  
-  try {
-    // Dynamic import for pdf-parse
+let PDFParseClass: any = null;
+async function parsePdfBuffer(buffer: Buffer): Promise<string> {
+  if (!PDFParseClass) {
     const module = await import("pdf-parse");
-    // pdf-parse exports PDFParse as the main function
-    pdfParseModule = (module as any).PDFParse || (module as any).default?.PDFParse || module.default || module;
+    PDFParseClass = (module as any).PDFParse || (module as any).default?.PDFParse;
     
-    if (typeof pdfParseModule !== 'function') {
-      throw new Error("Could not find pdf-parse function in module");
+    if (!PDFParseClass) {
+      throw new Error("Could not find PDFParse class in module");
     }
-    
-    return pdfParseModule;
-  } catch (e) {
-    console.error("Failed to load pdf-parse:", e);
-    throw new Error("PDF parsing module not available");
   }
+  
+  // PDFParse is a class that takes options with data property
+  const parser = new PDFParseClass({ data: buffer });
+  await parser.load();
+  const text = await parser.getText();
+  return text;
 }
 
 const scryptAsync = promisify(scrypt);
@@ -531,9 +528,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: "CV dosyası gerekli" });
       }
 
-      const pdfParse = await getPdfParse();
-      const pdfData = await pdfParse(req.file.buffer);
-      const cvText = pdfData.text;
+      const cvText = await parsePdfBuffer(req.file.buffer);
 
       if (!cvText || cvText.trim().length < 50) {
         return res.status(422).json({ 
