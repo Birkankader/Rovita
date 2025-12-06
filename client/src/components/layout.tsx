@@ -12,7 +12,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "Job Analysis", href: "/job-analysis", icon: Briefcase },
     { label: "Roadmap", href: "/roadmap", icon: Map },
-    { label: "Profile", href: "/onboarding", icon: User },
+    { label: "Assessment", href: "/assessment", icon: User },
+    { label: "Profile", href: "/profile", icon: User },
   ];
 
   const isActive = (path: string) => location === path;

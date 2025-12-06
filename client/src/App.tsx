@@ -10,6 +10,8 @@ import Onboarding from "@/pages/onboarding";
 import Dashboard from "@/pages/dashboard";
 import JobAnalysis from "@/pages/job-analysis";
 import Roadmap from "@/pages/roadmap";
+import Assessment from "@/pages/assessment";
+import Profile from "@/pages/profile";
 
 function Router() {
   return (
@@ -20,6 +22,8 @@ function Router() {
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/job-analysis" component={JobAnalysis} />
         <Route path="/roadmap" component={Roadmap} />
+        <Route path="/assessment" component={Assessment} />
+        <Route path="/profile" component={Profile} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

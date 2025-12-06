@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Circle, Lock, PlayCircle, BookOpen, Video, Users, Clock } from "lucide-react";
+import { CheckCircle2, Circle, Lock, PlayCircle, BookOpen, Video, Users, Clock, BrainCircuit } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Roadmap() {
   const quests = [
@@ -53,19 +54,27 @@ export default function Roadmap() {
           <h1 className="text-3xl font-heading font-bold">Your Development Roadmap</h1>
           <p className="text-muted-foreground">Gamified learning path customized to your skill gaps.</p>
         </div>
-        <Card className="px-4 py-2 border-accent/20 bg-accent/5">
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-xs font-medium text-muted-foreground">Total XP</p>
-              <p className="font-bold text-accent text-lg">4,250</p>
+        <div className="flex gap-4">
+          <Link href="/assessment">
+            <Button variant="outline" className="gap-2 border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:text-orange-800">
+              <BrainCircuit className="size-4" />
+              Take Soft Skills Test
+            </Button>
+          </Link>
+          <Card className="px-4 py-2 border-accent/20 bg-accent/5">
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-xs font-medium text-muted-foreground">Total XP</p>
+                <p className="font-bold text-accent text-lg">4,250</p>
+              </div>
+              <div className="h-8 w-px bg-border"></div>
+              <div className="text-right">
+                <p className="text-xs font-medium text-muted-foreground">Streak</p>
+                <p className="font-bold text-foreground text-lg">🔥 3 Days</p>
+              </div>
             </div>
-            <div className="h-8 w-px bg-border"></div>
-            <div className="text-right">
-              <p className="text-xs font-medium text-muted-foreground">Streak</p>
-              <p className="font-bold text-foreground text-lg">🔥 3 Days</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
