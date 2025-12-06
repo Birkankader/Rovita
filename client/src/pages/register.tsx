@@ -254,7 +254,11 @@ export default function Register() {
                     type="button"
                     variant="outline"
                     className="w-full h-20 border-dashed"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
                     disabled={isParsing}
                     data-testid="button-upload-cv"
                   >
