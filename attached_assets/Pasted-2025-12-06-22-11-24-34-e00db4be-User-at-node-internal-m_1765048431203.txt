@@ -1,0 +1,225 @@
+2025-12-06 22:11:24.34
+e00db4be
+User
+at node:internal/main/run_main_module:28:49 {
+2025-12-06 22:11:24.34
+e00db4be
+User
+}
+2025-12-06 22:11:24.34
+e00db4be
+User
+at createRequire (node:internal/modules/cjs/loader:1696:11)
+2025-12-06 22:11:24.35
+e00db4be
+System
+command finished with error [npm run start]: exit status 1
+2025-12-06 22:11:24.80
+e00db4be
+User
+> NODE_ENV=production node dist/index.cjs
+2025-12-06 22:11:24.80
+e00db4be
+User
+> rest-express@1.0.0 start
+2025-12-06 22:11:24.99
+e00db4be
+User
+at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+2025-12-06 22:11:24.99
+e00db4be
+User
+at Module._compile (node:internal/modules/cjs/loader:1529:14)
+2025-12-06 22:11:24.99
+e00db4be
+User
+at node:internal/main/run_main_module:28:49 {
+2025-12-06 22:11:24.99
+e00db4be
+User
+at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+2025-12-06 22:11:24.99
+e00db4be
+User
+at Module._load (node:internal/modules/cjs/loader:1096:12)
+2025-12-06 22:11:24.99
+e00db4be
+User
+at Module.load (node:internal/modules/cjs/loader:1275:32)
+2025-12-06 22:11:24.99
+e00db4be
+User
+throw new ERR_INVALID_ARG_VALUE('filename', filename, createRequireError);
+2025-12-06 22:11:24.99
+e00db4be
+User
+at Object. (/home/runner/workspace/dist/index.cjs:115:1402)
+2025-12-06 22:11:24.99
+e00db4be
+User
+}
+2025-12-06 22:11:24.99
+e00db4be
+User
+Node.js v20.19.3
+2025-12-06 22:11:24.99
+e00db4be
+User
+code: 'ERR_INVALID_ARG_VALUE'
+2025-12-06 22:11:24.99
+e00db4be
+User
+node:internal/modules/cjs/loader:1696
+2025-12-06 22:11:24.99
+e00db4be
+User
+TypeError [ERR_INVALID_ARG_VALUE]: The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received undefined
+2025-12-06 22:11:24.99
+e00db4be
+User
+at createRequire (node:internal/modules/cjs/loader:1696:11)
+2025-12-06 22:11:24.99
+e00db4be
+User
+^
+2025-12-06 22:11:25.00
+e00db4be
+System
+command finished with error [npm run start]: exit status 1
+2025-12-06 22:11:25.19
+e00db4be
+User
+> NODE_ENV=production node dist/index.cjs
+2025-12-06 22:11:25.19
+e00db4be
+User
+> rest-express@1.0.0 start
+2025-12-06 22:11:25.37
+e00db4be
+User
+code: 'ERR_INVALID_ARG_VALUE'
+2025-12-06 22:11:25.37
+e00db4be
+User
+throw new ERR_INVALID_ARG_VALUE('filename', filename, createRequireError);
+2025-12-06 22:11:25.37
+e00db4be
+User
+at Module._load (node:internal/modules/cjs/loader:1096:12)
+2025-12-06 22:11:25.37
+e00db4be
+User
+node:internal/modules/cjs/loader:1696
+2025-12-06 22:11:25.37
+e00db4be
+User
+}
+2025-12-06 22:11:25.37
+e00db4be
+User
+at createRequire (node:internal/modules/cjs/loader:1696:11)
+2025-12-06 22:11:25.37
+e00db4be
+User
+TypeError [ERR_INVALID_ARG_VALUE]: The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received undefined
+2025-12-06 22:11:25.37
+e00db4be
+User
+at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+2025-12-06 22:11:25.37
+e00db4be
+User
+at node:internal/main/run_main_module:28:49 {
+2025-12-06 22:11:25.37
+e00db4be
+User
+^
+2025-12-06 22:11:25.37
+e00db4be
+User
+at Object. (/home/runner/workspace/dist/index.cjs:115:1402)
+2025-12-06 22:11:25.37
+e00db4be
+User
+Node.js v20.19.3
+2025-12-06 22:11:25.37
+e00db4be
+User
+at Module._compile (node:internal/modules/cjs/loader:1529:14)
+2025-12-06 22:11:29.59
+e00db4be
+User
+> rest-express@1.0.0 start
+2025-12-06 22:11:29.59
+e00db4be
+User
+> NODE_ENV=production node dist/index.cjs
+2025-12-06 22:11:29.76
+e00db4be
+User
+at Module.load (node:internal/modules/cjs/loader:1275:32)
+2025-12-06 22:11:29.76
+e00db4be
+User
+at Module._load (node:internal/modules/cjs/loader:1096:12)
+2025-12-06 22:11:29.76
+e00db4be
+User
+at Object. (/home/runner/workspace/dist/index.cjs:115:1402)
+2025-12-06 22:11:29.76
+e00db4be
+User
+Node.js v20.19.3
+2025-12-06 22:11:29.76
+e00db4be
+User
+}
+2025-12-06 22:11:29.76
+e00db4be
+User
+^
+2025-12-06 22:11:29.76
+e00db4be
+User
+node:internal/modules/cjs/loader:1696
+2025-12-06 22:11:29.76
+e00db4be
+User
+throw new ERR_INVALID_ARG_VALUE('filename', filename, createRequireError);
+2025-12-06 22:11:29.76
+e00db4be
+User
+code: 'ERR_INVALID_ARG_VALUE'
+2025-12-06 22:11:29.76
+e00db4be
+User
+at createRequire (node:internal/modules/cjs/loader:1696:11)
+2025-12-06 22:11:29.76
+e00db4be
+User
+at node:internal/main/run_main_module:28:49 {
+2025-12-06 22:11:29.76
+e00db4be
+User
+at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+2025-12-06 22:11:29.76
+e00db4be
+User
+at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+2025-12-06 22:11:29.76
+e00db4be
+User
+at Module._compile (node:internal/modules/cjs/loader:1529:14)
+2025-12-06 22:11:29.76
+e00db4be
+User
+TypeError [ERR_INVALID_ARG_VALUE]: The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received undefined
+2025-12-06 22:11:29.78
+e00db4be
+System
+command finished with error [npm run start]: exit status 1
+
+2025-12-06 22:11:36.16
+e00db4be
+System
+crash loop detected

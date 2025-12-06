@@ -12,10 +12,10 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
+import * as pdfParseModule from "pdf-parse";
 import { parseCVText } from "./cv-parser";
+
+const pdfParse = (pdfParseModule as any).default || pdfParseModule;
 
 const scryptAsync = promisify(scrypt);
 
