@@ -307,8 +307,8 @@ export async function registerRoutes(
       try {
         parsedUrl = new URL(url);
         
-        // Transform LinkedIn search URL to view URL
-        if (parsedUrl.hostname.includes("linkedin.com") && parsedUrl.pathname.includes("/jobs/search")) {
+        // Transform LinkedIn URL with currentJobId to view URL
+        if (parsedUrl.hostname.includes("linkedin.com")) {
           const currentJobId = parsedUrl.searchParams.get("currentJobId");
           if (currentJobId) {
             finalUrl = `https://www.linkedin.com/jobs/view/${currentJobId}`;
