@@ -109,16 +109,10 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" type="button" className="h-11" data-testid="button-linkedin">
-                <Linkedin className="mr-2 size-4 text-[#0077b5]" />
-                LinkedIn
-              </Button>
-              <Button variant="outline" type="button" className="h-11" data-testid="button-github">
-                <Github className="mr-2 size-4" />
-                GitHub
-              </Button>
-            </div>
+            <Button variant="outline" type="button" className="h-11 w-full" disabled data-testid="button-linkedin">
+              <Linkedin className="mr-2 size-4 text-[#0077b5]" />
+              LinkedIn ile Giriş Yap (Yakında)
+            </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground">

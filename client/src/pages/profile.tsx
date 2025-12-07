@@ -377,23 +377,6 @@ export default function Profile() {
                         <Edit2 className="mr-2 size-4" />
                         Profili Düzenle
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        onClick={async () => {
-                          await logout();
-                          setLocation("/");
-                        }} 
-                        disabled={isLoggingOut}
-                        data-testid="button-logout"
-                      >
-                        {isLoggingOut ? (
-                          <Loader2 className="mr-2 size-4 animate-spin" />
-                        ) : (
-                          <LogOut className="mr-2 size-4" />
-                        )}
-                        Çıkış Yap
-                      </Button>
                     </>
                   )}
                 </div>
