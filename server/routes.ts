@@ -17,16 +17,17 @@ import { analyzeJobWithAI, generateQuestTasks } from "./job-analyzer";
 import * as cheerio from "cheerio";
 
 // Lazy load pdf-parse to handle both ESM (dev) and CJS (prod) environments
-let pdfParse: any = null;
+let PDFParseClass: any = null;
 async function parsePdfBuffer(buffer: Buffer): Promise<string> {
-  if (!pdfParse) {
+  if (!PDFParseClass) {
     const module = await import("pdf-parse");
-    // pdf-parse exports a default function
-    pdfParse = module.default || module;
+    PDFParseClass = module.PDFParse;
   }
   
-  // pdf-parse takes a buffer and returns a promise with { text, numpages, info, metadata, version }
-  const result = await pdfParse(buffer);
+  // PDFParse is a class that takes options with data property
+  const parser = new PDFParseClass({ data: buffer });
+  await parser.load();
+  const result = await parser.getText();
   return result.text || "";
 }
 
