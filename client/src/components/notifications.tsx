@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Bell, Calendar, Trophy, Check } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Notification {
   id: number;
@@ -15,55 +15,74 @@ interface Notification {
   message: string;
   time: string;
   type: string;
-  unread: boolean;
+}
+
+const STORAGE_KEY = "rotiva_read_notifications";
+
+const defaultNotifications: Notification[] = [
+  {
+    id: 1,
+    title: "Serini kaybetme!",
+    message: "Bugün bir görev tamamlamadın. 3 günlük serini canlı tutmak için giriş yap.",
+    time: "2 saat önce",
+    type: "streak",
+  },
+  {
+    id: 2,
+    title: "Yeni Görev Mevcut",
+    message: "Yol haritana 'CSS Grid'de Ustalaşma' adlı yeni bir görev eklendi.",
+    time: "5 saat önce",
+    type: "quest",
+  },
+  {
+    id: 3,
+    title: "Seviye Atladın!",
+    message: "Tebrikler! Seviye 5'e ulaştın. Yeni rozetine göz at.",
+    time: "1 gün önce",
+    type: "achievement",
+  },
+  {
+    id: 4,
+    title: "Sistem Güncellemesi",
+    message: "Daha iyi doğruluk için iş analizi algoritmasını geliştirdik.",
+    time: "2 gün önce",
+    type: "system",
+  }
+];
+
+function getReadNotifications(): number[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveReadNotifications(ids: number[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
 }
 
 export function Notifications() {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      title: "Serini kaybetme!",
-      message: "Bugün bir görev tamamlamadın. 3 günlük serini canlı tutmak için giriş yap.",
-      time: "2 saat önce",
-      type: "streak",
-      unread: true
-    },
-    {
-      id: 2,
-      title: "Yeni Görev Mevcut",
-      message: "Yol haritana 'CSS Grid'de Ustalaşma' adlı yeni bir görev eklendi.",
-      time: "5 saat önce",
-      type: "quest",
-      unread: true
-    },
-    {
-      id: 3,
-      title: "Seviye Atladın!",
-      message: "Tebrikler! Seviye 5'e ulaştın. Yeni rozetine göz at.",
-      time: "1 gün önce",
-      type: "achievement",
-      unread: true
-    },
-    {
-      id: 4,
-      title: "Sistem Güncellemesi",
-      message: "Daha iyi doğruluk için iş analizi algoritmasını geliştirdik.",
-      time: "2 gün önce",
-      type: "system",
-      unread: false
-    }
-  ]);
+  const [readIds, setReadIds] = useState<number[]>([]);
+  
+  useEffect(() => {
+    setReadIds(getReadNotifications());
+  }, []);
 
-  const unreadCount = notifications.filter(n => n.unread).length;
+  const notifications = defaultNotifications.filter(n => !readIds.includes(n.id));
+  const unreadCount = notifications.length;
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+    const allIds = defaultNotifications.map(n => n.id);
+    setReadIds(allIds);
+    saveReadNotifications(allIds);
   };
 
   const markAsRead = (id: number) => {
-    setNotifications(prev => prev.map(n => 
-      n.id === id ? { ...n, unread: false } : n
-    ));
+    const newReadIds = [...readIds, id];
+    setReadIds(newReadIds);
+    saveReadNotifications(newReadIds);
   };
 
   return (
@@ -108,7 +127,7 @@ export function Notifications() {
               notifications.map((notification) => (
                 <div 
                   key={notification.id} 
-                  className={`p-4 border-b last:border-0 hover:bg-muted/50 transition-colors cursor-pointer ${notification.unread ? 'bg-primary/5' : ''}`}
+                  className="p-4 border-b last:border-0 hover:bg-muted/50 transition-colors cursor-pointer bg-primary/5"
                   onClick={() => markAsRead(notification.id)}
                   data-testid={`notification-item-${notification.id}`}
                 >
@@ -126,9 +145,7 @@ export function Notifications() {
                     <div className="space-y-1 flex-1">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium leading-none">{notification.title}</p>
-                        {notification.unread && (
-                          <span className="size-2 bg-primary rounded-full shrink-0" />
-                        )}
+                        <span className="size-2 bg-primary rounded-full shrink-0" />
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2">{notification.message}</p>
                       <p className="text-[10px] text-muted-foreground pt-1">{notification.time}</p>
