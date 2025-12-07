@@ -61,6 +61,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <span className="sr-only">Ayarlar</span>
                   </Button>
                 </Link>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={async () => {
+                    await logout();
+                    window.location.href = "/";
+                  }}
+                  disabled={isLoggingOut}
+                  className="text-muted-foreground hover:text-destructive"
+                  data-testid="button-logout-desktop"
+                >
+                  <LogOut className="size-5" />
+                  <span className="sr-only">Çıkış Yap</span>
+                </Button>
               </>
             )}
           </nav>
