@@ -303,8 +303,18 @@ export async function registerRoutes(
 
       // Security: Parse and validate URL
       let parsedUrl: URL;
+      let finalUrl = url;
       try {
         parsedUrl = new URL(url);
+        
+        // Transform LinkedIn search URL to view URL
+        if (parsedUrl.hostname.includes("linkedin.com") && parsedUrl.pathname.includes("/jobs/search")) {
+          const currentJobId = parsedUrl.searchParams.get("currentJobId");
+          if (currentJobId) {
+            finalUrl = `https://www.linkedin.com/jobs/view/${currentJobId}`;
+            parsedUrl = new URL(finalUrl);
+          }
+        }
       } catch {
         return res.status(400).json({ message: "Geçersiz URL formatı" });
       }
@@ -330,7 +340,7 @@ export async function registerRoutes(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
-      const response = await fetch(url, {
+      const response = await fetch(finalUrl, {
         headers: {
           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
           "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",

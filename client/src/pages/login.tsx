@@ -87,7 +87,7 @@ export default function Login() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-11 text-base" disabled={isLoggingIn} data-testid="button-login">
+            <Button type="submit" className="w-full h-11 text-base" disabled={isLoggingIn || !email || !password} data-testid="button-login">
               {isLoggingIn ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
