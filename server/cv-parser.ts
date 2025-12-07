@@ -1,11 +1,25 @@
 import OpenAI from "openai";
 import { z } from "zod";
 
-// This is using Replit's AI Integrations service, which provides OpenAI-compatible API access
-const openai = new OpenAI({
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY
-});
+// Support both Replit AI Integrations (development) and direct OpenAI API (production)
+function createOpenAIClient() {
+  // First try Replit AI Integrations
+  if (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+    return new OpenAI({
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY
+    });
+  }
+  // Fall back to direct OpenAI API
+  if (process.env.OPENAI_API_KEY) {
+    return new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+  }
+  return null;
+}
+
+const openai = createOpenAIClient();
 
 const parsedCVSchema = z.object({
   jobTitle: z.string().max(200).nullable().optional(),
@@ -148,8 +162,8 @@ export interface ParseCVResult {
 }
 
 export async function parseCVText(cvText: string): Promise<ParseCVResult> {
-  if (!process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || !process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
-    throw new Error("AI entegrasyonu yapılandırılmamış. Lütfen daha sonra tekrar deneyin.");
+  if (!openai) {
+    throw new Error("AI entegrasyonu yapılandırılmamış. Lütfen OPENAI_API_KEY ayarlayın.");
   }
 
   try {
