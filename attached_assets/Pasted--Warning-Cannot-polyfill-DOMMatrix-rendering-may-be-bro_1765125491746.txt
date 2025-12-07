@@ -1,0 +1,110 @@
+
+Warning: Cannot polyfill `DOMMatrix`, rendering may be broken.
+2025-12-07 19:36:30.05
+9e1885a4
+User
+Warning: Cannot polyfill `Path2D`, rendering may be broken.
+2025-12-07 19:36:30.05
+9e1885a4
+User
+Warning: Cannot access the `require` function: "TypeError [ERR_INVALID_ARG_VALUE]: The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received undefined".
+2025-12-07 19:36:30.05
+9e1885a4
+User
+Warning: Cannot polyfill `ImageData`, rendering may be broken.
+2025-12-07 19:36:30.05
+9e1885a4
+User
+at /home/runner/workspace/dist/index.cjs:7:231
+2025-12-07 19:36:30.05
+9e1885a4
+User
+CV parse error: ReferenceError: DOMMatrix is not defined
+2025-12-07 19:36:30.05
+9e1885a4
+User
+at /home/runner/workspace/dist/index.cjs:7:231
+2025-12-07 19:36:30.05
+9e1885a4
+User
+at async E7e (/home/runner/workspace/dist/index.cjs:343:189827)
+2025-12-07 19:36:30.05
+9e1885a4
+User
+at /home/runner/workspace/dist/index.cjs:7:231
+2025-12-07 19:36:30.05
+9e1885a4
+User
+at /home/runner/workspace/dist/index.cjs:343:189861
+2025-12-07 19:36:30.05
+9e1885a4
+User
+at /home/runner/workspace/dist/index.cjs:225:845
+2025-12-07 19:36:30.05
+9e1885a4
+User
+at /home/runner/workspace/dist/index.cjs:236:365
+2025-12-07 19:36:30.05
+9e1885a4
+User
+at async /home/runner/workspace/dist/index.cjs:343:207817
+2025-12-07 19:36:30.05
+9e1885a4
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-12-07 19:36:30.05
+9e1885a4
+User
+at /home/runner/workspace/dist/index.cjs:214:110939
+2025-12-07 19:36:30.09
+9e1885a4
+User
+4:36:30 PM [express] POST /api/cv/parse 500 in 79ms :: {"message":"DOMMatrix is not defined","code":"INTERNAL_ERROR"}
+2025-12-07 19:36:58.20
+9e1885a4
+User
+4:36:58 PM [express] GET /api/profile 200 in 69ms :: {"id":"c4671036-bda6-4f39-acd9-cb8f4f682675","userId":"823ae504-6151-4568-bfd1-44f3006f7d39","jobTitle":null,"bio":null,"location":null,"website":null,"linkedinUrl":null,"githubUrl":null,"skills":[],"experience":[],"education":[],"updatedAt":"2025-12-07T16:36:25.230Z"}
+2025-12-07 19:37:02.33
+9e1885a4
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-12-07 19:37:02.33
+9e1885a4
+User
+at E7e (/home/runner/workspace/dist/index.cjs:343:189890)
+2025-12-07 19:37:02.33
+9e1885a4
+User
+at async /home/runner/workspace/dist/index.cjs:343:207817
+2025-12-07 19:37:02.33
+9e1885a4
+User
+CV parse error: TypeError: lk is not a constructor
+2025-12-07 19:37:02.36
+9e1885a4
+User
+4:37:02 PM [express] POST /api/cv/parse 500 in 37ms :: {"message":"lk is not a constructor","code":"INTERNAL_ERROR"}
+2025-12-07 19:37:22.07
+9e1885a4
+User
+at async /home/runner/workspace/dist/index.cjs:343:207817
+2025-12-07 19:37:22.07
+9e1885a4
+User
+at E7e (/home/runner/workspace/dist/index.cjs:343:189890)
+2025-12-07 19:37:22.07
+9e1885a4
+User
+CV parse error: TypeError: lk is not a constructor
+2025-12-07 19:37:22.07
+9e1885a4
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-12-07 19:37:22.10
+9e1885a4
+User
+4:37:22 PM [express] POST /api/cv/parse 500 in 37ms :: {"message":"lk is not a constructor","code":"INTERNAL_ERROR"}
+2025-12-07 19:37:22.10
+9e1885a4
+User
+4:37:22 PM [express] POST /api/cv/parse 500 in 37ms :: {"message":"lk is not a constructor","code":"INTERNAL_ERROR"}
