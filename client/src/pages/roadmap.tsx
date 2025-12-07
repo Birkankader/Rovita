@@ -198,7 +198,7 @@ export default function Roadmap() {
                 İş ilanı analiz ederek veya sosyal beceri testi çözerek görevler kazanabilirsiniz.
               </p>
               <div className="flex flex-col gap-2">
-                <Link href="/analyze">
+                <Link href="/job-analysis">
                   <Button className="w-full" data-testid="button-go-analyze">
                     <Briefcase className="mr-2 size-4" />
                     İş İlanı Analiz Et
@@ -418,7 +418,7 @@ export default function Roadmap() {
                 <p className="text-muted-foreground mb-4">
                   Sol taraftan bir görev seçin veya iş ilanı analizi yaparak yeni görevler kazanın.
                 </p>
-                <Link href="/analyze">
+                <Link href="/job-analysis">
                   <Button data-testid="button-go-analyze-empty">
                     <Briefcase className="mr-2 size-4" />
                     İş İlanı Analiz Et

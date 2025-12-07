@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Briefcase, CheckCircle2, XCircle, AlertCircle, ArrowRight, Loader2, Link as LinkIcon, Info, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +28,7 @@ export default function JobAnalysis() {
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [jobUrl, setJobUrl] = useState("");
@@ -87,6 +88,8 @@ export default function JobAnalysis() {
     },
     onSuccess: (data) => {
       setResult(data);
+      queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/job-analysis"] });
       toast({ title: "Analiz tamamlandı!", description: "Sonuçlarınız hazır." });
     },
     onError: (error: any) => {
