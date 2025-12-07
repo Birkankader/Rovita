@@ -330,7 +330,7 @@ export default function Roadmap() {
                     {selectedQuest.tasks.map((task) => (
                       <div 
                         key={task.id} 
-                        className={`p-4 rounded-lg border ${task.completed ? 'bg-green-50/50 border-green-200/50' : 'bg-background border-border'}`}
+                        className={`p-4 rounded-lg border ${task.completed ? 'bg-green-500/10 border-green-500/30 dark:bg-green-500/20 dark:border-green-500/40' : 'bg-background border-border'}`}
                         data-testid={`task-item-${selectedQuest.id}-${task.id}`}
                       >
                         <div className="flex items-start gap-3">

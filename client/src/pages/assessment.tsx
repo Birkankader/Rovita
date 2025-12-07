@@ -264,14 +264,20 @@ export default function Assessment() {
     enabled: isAuthenticated,
   });
 
+  const [createdQuestTitle, setCreatedQuestTitle] = useState<string | null>(null);
+
   const saveResultMutation = useMutation({
     mutationFn: async (data: { assessmentType: string; score: number; feedback: string }) => {
       const res = await apiRequest("POST", "/api/assessments", data);
-      return res.json();
+      return res.json() as Promise<{ createdQuestTitle?: string | null }>;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/assessments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/progress"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
+      if (data.createdQuestTitle) {
+        setCreatedQuestTitle(data.createdQuestTitle);
+      }
     },
   });
 
@@ -515,18 +521,43 @@ export default function Assessment() {
           </CardContent>
         </Card>
 
+        {createdQuestTitle && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="size-10 bg-primary/20 text-primary rounded-full flex items-center justify-center">
+                  <Zap className="size-5" />
+                </div>
+                <div>
+                  <p className="font-medium">Yeni Eğitim Eklendi!</p>
+                  <p className="text-sm text-muted-foreground">{createdQuestTitle}</p>
+                </div>
+              </div>
+              <Link href="/roadmap">
+                <Button className="w-full" data-testid="button-go-roadmap">
+                  Yol Haritasına Git
+                  <ChevronRight className="ml-2 size-4" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="flex gap-4 justify-center">
           <Button variant="outline" onClick={handleBack} data-testid="button-all-tests">
             Tüm Testler
           </Button>
-          <Link href="/dashboard">
-            <Button variant="outline">Panele Dön</Button>
-          </Link>
+          {!createdQuestTitle && (
+            <Link href="/dashboard">
+              <Button variant="outline">Panele Dön</Button>
+            </Link>
+          )}
           <Button onClick={() => {
             setCompleted(false);
             setCurrentQuestion(0);
             setStarted(false);
             setAnswers({});
+            setCreatedQuestTitle(null);
           }} data-testid="button-retry">
             <RefreshCw className="mr-2 size-4" />
             Tekrarla

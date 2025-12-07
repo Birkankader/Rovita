@@ -789,6 +789,7 @@ export async function registerRoutes(
       }
 
       // Auto-create learning quest for low scores
+      let createdQuestTitle: string | null = null;
       if (resultData.score < 80) {
         const skillInfo = softSkillInfo[resultData.assessmentType];
         if (skillInfo) {
@@ -808,11 +809,12 @@ export async function registerRoutes(
               xp: 75,
               tasks: skillInfo.tasks,
             });
+            createdQuestTitle = skillInfo.title;
           }
         }
       }
 
-      res.status(201).json(result);
+      res.status(201).json({ ...result, createdQuestTitle });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Geçersiz değerlendirme verisi" });
