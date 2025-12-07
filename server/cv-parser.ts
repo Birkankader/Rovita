@@ -2,24 +2,29 @@ import OpenAI from "openai";
 import { z } from "zod";
 
 // Support both Replit AI Integrations (development) and direct OpenAI API (production)
-function createOpenAIClient() {
+// Lazy initialization to ensure environment variables are loaded
+let _openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI | null {
+  if (_openai) return _openai;
+  
   // First try Replit AI Integrations
   if (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
-    return new OpenAI({
+    _openai = new OpenAI({
       baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
       apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY
     });
+    return _openai;
   }
   // Fall back to direct OpenAI API
   if (process.env.OPENAI_API_KEY) {
-    return new OpenAI({
+    _openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
     });
+    return _openai;
   }
   return null;
 }
-
-const openai = createOpenAIClient();
 
 const parsedCVSchema = z.object({
   jobTitle: z.string().max(200).nullable().optional(),
@@ -162,6 +167,7 @@ export interface ParseCVResult {
 }
 
 export async function parseCVText(cvText: string): Promise<ParseCVResult> {
+  const openai = getOpenAIClient();
   if (!openai) {
     throw new Error("AI entegrasyonu yapılandırılmamış. Lütfen OPENAI_API_KEY ayarlayın.");
   }

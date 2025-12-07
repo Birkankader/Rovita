@@ -2,24 +2,29 @@ import OpenAI from "openai";
 import { z } from "zod";
 
 // Support both Replit AI Integrations (development) and direct OpenAI API (production)
-function createOpenAIClient() {
+// Lazy initialization to ensure environment variables are loaded
+let _openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI | null {
+  if (_openai) return _openai;
+  
   // First try Replit AI Integrations
   if (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
-    return new OpenAI({
+    _openai = new OpenAI({
       baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
       apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY
     });
+    return _openai;
   }
   // Fall back to direct OpenAI API
   if (process.env.OPENAI_API_KEY) {
-    return new OpenAI({
+    _openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
     });
+    return _openai;
   }
   return null;
 }
-
-const openai = createOpenAIClient();
 
 const jobAnalysisSchema = z.object({
   requiredSkills: z.array(z.string()).default([]),
@@ -57,6 +62,7 @@ export async function analyzeJobWithAI(
   jobTitle: string,
   jobDescription: string
 ): Promise<JobAnalysisResult> {
+  const openai = getOpenAIClient();
   if (!openai) {
     return fallbackAnalysis(userSkills, jobDescription);
   }
@@ -223,6 +229,7 @@ export async function generateQuestTasks(
   skill: string,
   jobTitle: string
 ): Promise<{ tasks: QuestTask[]; description: string }> {
+  const openai = getOpenAIClient();
   if (!openai) {
     return fallbackQuestTasks(skill, jobTitle);
   }
