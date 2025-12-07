@@ -46,6 +46,10 @@ async function buildAll() {
     ...Object.keys(pkg.devDependencies || {}),
   ];
   const externals = allDeps.filter((dep) => !allowlist.includes(dep));
+  
+  // Force pdf-parse and its dependencies to be external (canvas/DOM issues when bundled)
+  const forceExternals = ["pdf-parse", "pdfjs-dist", "canvas"];
+  const allExternals = [...new Set([...externals, ...forceExternals])];
 
   await esbuild({
     entryPoints: ["server/index.ts"],
@@ -65,7 +69,7 @@ if (typeof globalThis !== 'undefined' && !globalThis.require) {
 `,
     },
     minify: true,
-    external: externals,
+    external: allExternals,
     logLevel: "info",
   });
 }
