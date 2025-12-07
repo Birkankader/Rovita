@@ -293,15 +293,26 @@ export async function registerRoutes(
   // Fetch job content from URL
   app.post("/api/job-analysis/fetch-url", requireAuth, async (req: Request, res: Response) => {
     try {
-      const { url } = z.object({
-        url: z.string().url("Geçerli bir URL girin"),
+      const { url: inputText } = z.object({
+        url: z.string().min(1, "URL veya metin gerekli"),
       }).parse(req.body);
+
+      // Extract URL from text if needed (e.g., "Şu iş ilanına bir göz atın: https://linkedin.com/jobs/view/123")
+      let extractedUrl = inputText.trim();
+      
+      // Try to find a URL in the text using regex
+      const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+      const matches = inputText.match(urlRegex);
+      if (matches && matches.length > 0) {
+        // Use the first URL found
+        extractedUrl = matches[0];
+      }
 
       // Security: Parse and validate URL
       let parsedUrl: URL;
-      let finalUrl = url;
+      let finalUrl = extractedUrl;
       try {
-        parsedUrl = new URL(url);
+        parsedUrl = new URL(extractedUrl);
         
         // Transform LinkedIn URL with currentJobId to view URL
         if (parsedUrl.hostname.includes("linkedin.com")) {
@@ -312,7 +323,7 @@ export async function registerRoutes(
           }
         }
       } catch {
-        return res.status(400).json({ message: "Geçersiz URL formatı" });
+        return res.status(400).json({ message: "Geçerli bir URL bulunamadı. Lütfen geçerli bir iş ilanı linki girin." });
       }
 
       // Security: Only allow HTTPS
