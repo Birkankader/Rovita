@@ -20,15 +20,10 @@ export default function Home() {
             Becerilerinizi gerçek iş tanımlarıyla karşılaştırın, eksiklerinizi belirleyin ve kariyer başarısı için oyunlaştırılmış bir yol haritasını takip edin.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Link href="/onboarding">
+            <Link href="/register">
               <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40 hover:-translate-y-0.5">
                 Hemen Başla
                 <ArrowRight className="ml-2 size-5" />
-              </Button>
-            </Link>
-            <Link href="/dashboard">
-              <Button size="lg" variant="outline" className="h-12 px-8 text-base">
-                Demoyu İncele
               </Button>
             </Link>
           </div>
