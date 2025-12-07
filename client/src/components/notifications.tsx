@@ -19,36 +19,7 @@ interface Notification {
 
 const STORAGE_KEY = "rotiva_read_notifications";
 
-const defaultNotifications: Notification[] = [
-  {
-    id: 1,
-    title: "Serini kaybetme!",
-    message: "Bugün bir görev tamamlamadın. 3 günlük serini canlı tutmak için giriş yap.",
-    time: "2 saat önce",
-    type: "streak",
-  },
-  {
-    id: 2,
-    title: "Yeni Görev Mevcut",
-    message: "Yol haritana 'CSS Grid'de Ustalaşma' adlı yeni bir görev eklendi.",
-    time: "5 saat önce",
-    type: "quest",
-  },
-  {
-    id: 3,
-    title: "Seviye Atladın!",
-    message: "Tebrikler! Seviye 5'e ulaştın. Yeni rozetine göz at.",
-    time: "1 gün önce",
-    type: "achievement",
-  },
-  {
-    id: 4,
-    title: "Sistem Güncellemesi",
-    message: "Daha iyi doğruluk için iş analizi algoritmasını geliştirdik.",
-    time: "2 gün önce",
-    type: "system",
-  }
-];
+const defaultNotifications: Notification[] = [];
 
 function getReadNotifications(): number[] {
   try {
