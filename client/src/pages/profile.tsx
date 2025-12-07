@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,13 +8,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { MapPin, Mail, Link as LinkIcon, Github, Linkedin, Edit2, Download, GraduationCap, Briefcase, Loader2, Save, X, Plus, Trash2 } from "lucide-react";
+import { MapPin, Mail, Link as LinkIcon, Github, Linkedin, Edit2, Download, GraduationCap, Briefcase, Loader2, Save, X, Plus, Trash2, Upload, FileText } from "lucide-react";
+import { useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+interface ParsedCV {
+  jobTitle: string | null;
+  bio: string | null;
+  skills: string[];
+  experience: Array<{ title: string; company: string; description: string }>;
+  education: Array<{ degree: string; school: string }>;
+  warnings?: string[];
+}
 
 interface Experience {
   title: string;
@@ -59,6 +69,14 @@ export default function Profile() {
   const [showEduDialog, setShowEduDialog] = useState(false);
   const [newExperience, setNewExperience] = useState<Experience>({ title: "", company: "", description: "" });
   const [newEducation, setNewEducation] = useState<Education>({ degree: "", school: "" });
+  
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [parsedCV, setParsedCV] = useState<ParsedCV | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isSavingImport, setIsSavingImport] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<Profile>) => {
@@ -171,6 +189,119 @@ export default function Profile() {
     updateExperienceEducationMutation.mutate({ education: updatedEducation });
   };
 
+  const handleCVUpload = async (file: File) => {
+    if (file.type !== "application/pdf") {
+      toast({ title: "Hata", description: "Sadece PDF dosyaları kabul edilir", variant: "destructive" });
+      return;
+    }
+
+    setCvFile(file);
+    setIsParsing(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("cv", file);
+
+      const response = await fetch("/api/cv/parse", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (response.status === 503 || response.status === 429 || response.status === 502 || response.status === 422) {
+        toast({ title: "Hata", description: data.message || "CV işlenemedi", variant: "destructive" });
+        setCvFile(null);
+        setParsedCV(null);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || "CV işlenemedi");
+      }
+
+      const parsedData = data as ParsedCV;
+      
+      if (parsedData.warnings && parsedData.warnings.length > 0) {
+        toast({ 
+          title: "Uyarılar", 
+          description: parsedData.warnings.slice(0, 2).join(". "),
+        });
+      }
+
+      setParsedCV(parsedData);
+      toast({ title: "CV İşlendi", description: "Bilgileriniz başarıyla analiz edildi" });
+    } catch (error: any) {
+      toast({ title: "Hata", description: error.message || "CV işlenirken bir hata oluştu", variant: "destructive" });
+      setCvFile(null);
+      setParsedCV(null);
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
+  const handleImportSave = async () => {
+    if (!parsedCV) return;
+    
+    setIsSavingImport(true);
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          jobTitle: parsedCV.jobTitle,
+          bio: parsedCV.bio,
+          skills: parsedCV.skills,
+          experience: parsedCV.experience,
+          education: parsedCV.education,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Profil kaydedilemedi");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      toast({ title: "Başarılı", description: "Profil bilgileri güncellendi" });
+      setShowImportDialog(false);
+      setCvFile(null);
+      setParsedCV(null);
+    } catch (error: any) {
+      toast({ title: "Hata", description: error.message || "Kaydetme sırasında hata oluştu", variant: "destructive" });
+    } finally {
+      setIsSavingImport(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleCVUpload(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const removeCVFile = () => {
+    setCvFile(null);
+    setParsedCV(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       setLocation("/login");
@@ -237,10 +368,16 @@ export default function Profile() {
                       </Button>
                     </>
                   ) : (
-                    <Button size="sm" onClick={handleEdit} data-testid="button-edit">
-                      <Edit2 className="mr-2 size-4" />
-                      Profili Düzenle
-                    </Button>
+                    <>
+                      <Button size="sm" variant="outline" onClick={() => setShowImportDialog(true)} data-testid="button-import">
+                        <Upload className="mr-2 size-4" />
+                        CV/LinkedIn'den Aktar
+                      </Button>
+                      <Button size="sm" onClick={handleEdit} data-testid="button-edit">
+                        <Edit2 className="mr-2 size-4" />
+                        Profili Düzenle
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
@@ -578,6 +715,149 @@ export default function Profile() {
           </Tabs>
         </div>
       </div>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Profil Verilerini İçe Aktar</DialogTitle>
+          </DialogHeader>
+          <Tabs defaultValue="cv" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50 rounded-xl">
+              <TabsTrigger value="cv" className="py-3 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all">
+                <FileText className="size-4" />
+                CV Yükle
+              </TabsTrigger>
+              <TabsTrigger value="linkedin" className="py-3 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg transition-all">
+                <Linkedin className="size-4" />
+                LinkedIn
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="mt-6">
+              <TabsContent value="cv">
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    PDF formatındaki özgeçmişinizi yükleyin, yapay zekamız onu işleyerek profilinizi güncellesin.
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleCVUpload(file);
+                    }}
+                    className="hidden"
+                    data-testid="input-cv-file-profile"
+                  />
+                  {!cvFile ? (
+                    <div 
+                      className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-3 transition-colors cursor-pointer ${
+                        isDragging ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      data-testid="cv-dropzone-profile"
+                    >
+                      <div className="size-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                        {isParsing ? <Loader2 className="size-6 animate-spin" /> : <Upload className="size-6" />}
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-medium">
+                          {isParsing ? "CV İşleniyor..." : "Yüklemek için tıklayın veya sürükleyin"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">PDF (maksimum 5MB)</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border rounded-xl p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="size-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                            <FileText className="size-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium truncate max-w-[200px]">{cvFile.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {parsedCV ? "İşlendi" : isParsing ? "İşleniyor..." : "Yüklendi"}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={removeCVFile}
+                          disabled={isParsing}
+                          data-testid="button-remove-cv-profile"
+                        >
+                          <X className="size-4" />
+                        </Button>
+                      </div>
+                      {parsedCV && (
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-1 text-sm">
+                          {parsedCV.jobTitle && (
+                            <p><span className="font-medium">Unvan:</span> {parsedCV.jobTitle}</p>
+                          )}
+                          {parsedCV.skills.length > 0 && (
+                            <p><span className="font-medium">Beceriler:</span> {parsedCV.skills.slice(0, 4).join(", ")}{parsedCV.skills.length > 4 && ` +${parsedCV.skills.length - 4}`}</p>
+                          )}
+                          {parsedCV.experience.length > 0 && (
+                            <p><span className="font-medium">Deneyim:</span> {parsedCV.experience.length} pozisyon</p>
+                          )}
+                          {parsedCV.education.length > 0 && (
+                            <p><span className="font-medium">Eğitim:</span> {parsedCV.education.length} kayıt</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="linkedin">
+                <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                  <div className="size-16 bg-[#0077b5]/10 rounded-full flex items-center justify-center text-[#0077b5]">
+                    <Linkedin className="size-8" />
+                  </div>
+                  <p className="text-sm text-muted-foreground text-center max-w-sm">
+                    LinkedIn entegrasyonu yakında aktif olacak. Şu an için CV yükleyerek profilinizi güncelleyebilirsiniz.
+                  </p>
+                  <Button disabled size="lg" className="bg-[#0077b5] hover:bg-[#0077b5]/90 text-white w-full max-w-xs">
+                    LinkedIn ile Bağlan (Yakında)
+                  </Button>
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => { setShowImportDialog(false); removeCVFile(); }}>
+              İptal
+            </Button>
+            <Button 
+              onClick={handleImportSave} 
+              disabled={!parsedCV || isParsing || isSavingImport}
+              data-testid="button-save-import"
+            >
+              {isSavingImport ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Kaydediliyor...
+                </>
+              ) : (
+                "Profili Güncelle"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
