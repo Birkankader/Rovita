@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, logout, isLoggingOut } = useAuth();
 
   if (location === "/login" || location === "/register") {
     return <>{children}</>;
@@ -101,6 +101,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       <Settings className="size-5" />
                       Ayarlar
                     </Link>
+                    <button
+                      onClick={async () => {
+                        setIsOpen(false);
+                        await logout();
+                        window.location.href = "/";
+                      }}
+                      disabled={isLoggingOut}
+                      className="flex items-center gap-3 px-4 py-3 rounded-md text-destructive hover:bg-destructive/10 transition-colors w-full text-left"
+                      data-testid="button-logout-mobile"
+                    >
+                      <LogOut className="size-5" />
+                      {isLoggingOut ? "Çıkış yapılıyor..." : "Çıkış Yap"}
+                    </button>
                   </>
                 )}
               </nav>
