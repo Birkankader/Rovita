@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { MapPin, Mail, Link as LinkIcon, Github, Linkedin, Edit2, Download, GraduationCap, Briefcase, Loader2, Save, X, Plus, Trash2, Upload, FileText } from "lucide-react";
+import { MapPin, Mail, Link as LinkIcon, Github, Linkedin, Edit2, Download, GraduationCap, Briefcase, Loader2, Save, X, Plus, Trash2, Upload, FileText, LogOut } from "lucide-react";
 import { useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -53,7 +53,7 @@ interface Profile {
 
 export default function Profile() {
   const [, setLocation] = useLocation();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, logout, isLoggingOut } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
@@ -304,7 +304,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      setLocation("/login");
+      setLocation("/");
     }
   }, [authLoading, isAuthenticated, setLocation]);
 
@@ -376,6 +376,23 @@ export default function Profile() {
                       <Button size="sm" onClick={handleEdit} data-testid="button-edit">
                         <Edit2 className="mr-2 size-4" />
                         Profili Düzenle
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        onClick={async () => {
+                          await logout();
+                          setLocation("/");
+                        }} 
+                        disabled={isLoggingOut}
+                        data-testid="button-logout"
+                      >
+                        {isLoggingOut ? (
+                          <Loader2 className="mr-2 size-4 animate-spin" />
+                        ) : (
+                          <LogOut className="mr-2 size-4" />
+                        )}
+                        Çıkış Yap
                       </Button>
                     </>
                   )}
