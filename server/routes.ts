@@ -484,6 +484,8 @@ export async function registerRoutes(
             progress: 0,
             xp: 100,
             tasks,
+            jobAnalysisId: analysis.id,
+            jobTitle: analysisInput.jobTitle,
           });
         }
       }

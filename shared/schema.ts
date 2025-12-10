@@ -21,6 +21,7 @@ export const profiles = pgTable("profiles", {
   website: text("website"),
   linkedinUrl: text("linkedin_url"),
   githubUrl: text("github_url"),
+  profilePhoto: text("profile_photo"),
   skills: text("skills").array().default(sql`ARRAY[]::text[]`),
   experience: jsonb("experience").default([]),
   education: jsonb("education").default([]),
@@ -43,6 +44,8 @@ export const jobAnalyses = pgTable("job_analyses", {
 export const learningQuests = pgTable("learning_quests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  jobAnalysisId: varchar("job_analysis_id").references(() => jobAnalyses.id, { onDelete: "set null" }),
+  jobTitle: text("job_title"),
   title: text("title").notNull(),
   description: text("description").notNull(),
   targetSkill: text("target_skill").notNull(),

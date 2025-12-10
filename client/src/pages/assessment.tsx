@@ -592,7 +592,8 @@ export default function Assessment() {
         </CardHeader>
         <CardContent className="flex-1">
           <RadioGroup 
-            value={answers[currentQuestion]} 
+            key={currentQuestion}
+            value={answers[currentQuestion] || ""} 
             onValueChange={(val) => setAnswers(prev => ({ ...prev, [currentQuestion]: val }))}
             className="space-y-3"
           >

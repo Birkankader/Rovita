@@ -310,8 +310,8 @@ export default function JobAnalysis() {
                     <div className="flex flex-wrap gap-2">
                       {result.skillsMatch && result.skillsMatch.length > 0 ? (
                         result.skillsMatch.map((skill, i) => (
-                          <Badge key={i} variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200" data-testid={`badge-match-${i}`}>
-                            {skill}
+                          <Badge key={i} variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200 max-w-full break-words" data-testid={`badge-match-${i}`}>
+                            <span className="truncate max-w-[200px]">{skill}</span>
                           </Badge>
                         ))
                       ) : (
@@ -330,8 +330,8 @@ export default function JobAnalysis() {
                     <div className="space-y-3">
                       {result.skillsGap && result.skillsGap.length > 0 ? (
                         result.skillsGap.map((skill, i) => (
-                          <div key={i} className="flex items-center justify-between p-2 rounded-md bg-destructive/5 border border-destructive/10" data-testid={`item-gap-${i}`}>
-                            <span className="font-medium text-sm">{skill}</span>
+                          <div key={i} className="flex items-center justify-between gap-2 p-2 rounded-md bg-destructive/5 border border-destructive/10" data-testid={`item-gap-${i}`}>
+                            <span className="font-medium text-sm break-words min-w-0 flex-1">{skill}</span>
                             <Badge variant="outline" className="border-destructive text-destructive">
                               {i < 3 ? "Kritik" : "Önemli"}
                             </Badge>
