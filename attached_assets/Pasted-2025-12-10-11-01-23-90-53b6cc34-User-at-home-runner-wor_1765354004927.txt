@@ -1,0 +1,172 @@
+2025-12-10 11:01:23.90
+53b6cc34
+User
+at /home/runner/workspace/dist/index.cjs:70:13356
+2025-12-10 11:01:23.90
+53b6cc34
+User
+internalQuery: undefined,
+2025-12-10 11:01:23.90
+53b6cc34
+User
+severity: 'ERROR',
+2025-12-10 11:01:23.90
+53b6cc34
+User
+line: '3722',
+2025-12-10 11:01:23.90
+53b6cc34
+User
+at async /home/runner/workspace/dist/index.cjs:223:100095
+2025-12-10 11:01:23.90
+53b6cc34
+User
+length: 113,
+2025-12-10 11:01:23.90
+53b6cc34
+User
+file: 'parse_relation.c',
+2025-12-10 11:01:23.90
+53b6cc34
+User
+constraint: undefined,
+2025-12-10 11:01:23.90
+53b6cc34
+User
+column: undefined,
+2025-12-10 11:01:23.90
+53b6cc34
+User
+table: undefined,
+2025-12-10 11:01:23.90
+53b6cc34
+User
+dataType: undefined,
+2025-12-10 11:01:23.90
+53b6cc34
+User
+position: '98',
+2025-12-10 11:01:23.90
+53b6cc34
+User
+routine: 'errorMissingColumn'
+2025-12-10 11:01:23.90
+53b6cc34
+User
+internalPosition: undefined,
+2025-12-10 11:01:23.90
+53b6cc34
+User
+at async $Q.getProfile (/home/runner/workspace/dist/index.cjs:223:103322)
+2025-12-10 11:01:23.90
+53b6cc34
+User
+}
+2025-12-10 11:01:23.90
+53b6cc34
+User
+at async /home/runner/workspace/dist/index.cjs:330:193854 {
+2025-12-10 11:01:23.90
+53b6cc34
+User
+detail: undefined,
+2025-12-10 11:01:23.90
+53b6cc34
+User
+hint: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+internalQuery: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+detail: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+at async /home/runner/workspace/dist/index.cjs:330:194178 {
+2025-12-10 11:05:34.80
+53b6cc34
+User
+table: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+line: '3722',
+2025-12-10 11:05:34.80
+53b6cc34
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-12-10 11:05:34.80
+53b6cc34
+User
+dataType: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+routine: 'errorMissingColumn'
+2025-12-10 11:05:34.80
+53b6cc34
+User
+schema: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+where: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+code: '42703',
+2025-12-10 11:05:34.80
+53b6cc34
+User
+at /home/runner/workspace/dist/index.cjs:70:13356
+2025-12-10 11:05:34.80
+53b6cc34
+User
+length: 113,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+hint: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+}
+2025-12-10 11:05:34.80
+53b6cc34
+User
+file: 'parse_relation.c',
+2025-12-10 11:05:34.80
+53b6cc34
+User
+Update profile error: error: column "profile_photo" does not exist
+2025-12-10 11:05:34.80
+53b6cc34
+User
+column: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+constraint: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+position: '98',
+2025-12-10 11:05:34.80
+53b6cc34
+User
+at async $Q.getProfile (/home/runner/workspace/dist/index.cjs:223:103322)
+2025-12-10 11:05:34.80
+53b6cc34
+User
+internalPosition: undefined,
+2025-12-10 11:05:34.80
+53b6cc34
+User
+at async /home/runner/workspace/dist/index.cjs:223:100095
+2025-12-10 11:05:34.80
+53b6cc34
+User
+severity: 'ERROR',
