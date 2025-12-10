@@ -517,21 +517,26 @@ export default function Roadmap() {
                   {completedQuests.slice(0, 5).map((quest) => (
                     <div 
                       key={quest.id} 
-                      className="flex items-center justify-between p-3 rounded-lg bg-green-50/50 border border-green-100 cursor-pointer hover:bg-green-100/50 transition-colors"
+                      className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 cursor-pointer hover:from-green-100 hover:to-emerald-100 hover:border-green-300 hover:shadow-sm transition-all"
                       onClick={() => setSelectedQuestId(quest.id)}
                       data-testid={`completed-quest-${quest.id}`}
                     >
-                      <div>
-                        <h4 className="font-medium text-sm">{quest.title}</h4>
-                        <p className="text-xs text-muted-foreground">{quest.targetSkill}</p>
-                        {quest.jobTitle && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                            <Briefcase className="size-3" />
-                            {quest.jobTitle}
-                          </p>
-                        )}
+                      <div className="flex items-center gap-3">
+                        <div className="size-8 rounded-full bg-green-500 flex items-center justify-center">
+                          <CheckCircle2 className="size-4 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-sm text-foreground">{quest.title}</h4>
+                          <p className="text-xs text-green-700">{quest.targetSkill}</p>
+                          {quest.jobTitle && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <Briefcase className="size-3" />
+                              {quest.jobTitle}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <Badge variant="secondary" className="bg-green-100 text-green-700">
+                      <Badge className="bg-green-600 text-white hover:bg-green-700">
                         +{quest.xp} XP
                       </Badge>
                     </div>
