@@ -1,0 +1,128 @@
+025-12-10 11:10:03.71
+77caabc8
+User
+8:10:03 AM [express] GET /api/auth/me 200 in 78ms :: {"user":{"id":"823ae504-6151-4568-bfd1-44f3006f7d39","email":"birkankader@outlook.com","firstName":"Birkan","lastName":"Kader","createdAt":"2025-12-07T16:36:25.183Z"}}
+2025-12-10 11:10:04.66
+77caabc8
+User
+position: '98',
+2025-12-10 11:10:04.66
+77caabc8
+User
+at async /home/runner/workspace/dist/index.cjs:223:100095
+2025-12-10 11:10:04.66
+77caabc8
+User
+internalQuery: undefined,
+2025-12-10 11:10:04.66
+77caabc8
+User
+constraint: undefined,
+2025-12-10 11:10:04.66
+77caabc8
+User
+at async /home/runner/workspace/dist/index.cjs:330:193854 {
+2025-12-10 11:10:04.66
+77caabc8
+User
+}
+2025-12-10 11:10:04.66
+77caabc8
+User
+detail: undefined,
+2025-12-10 11:10:04.66
+77caabc8
+User
+line: '3722',
+2025-12-10 11:10:04.66
+77caabc8
+User
+length: 113,
+2025-12-10 11:10:04.66
+77caabc8
+User
+code: '42703',
+2025-12-10 11:10:04.66
+77caabc8
+User
+routine: 'errorMissingColumn'
+2025-12-10 11:10:04.66
+77caabc8
+User
+at async $Q.getProfile (/home/runner/workspace/dist/index.cjs:223:103322)
+2025-12-10 11:10:04.66
+77caabc8
+User
+schema: undefined,
+2025-12-10 11:10:04.66
+77caabc8
+User
+hint: undefined,
+2025-12-10 11:10:04.66
+77caabc8
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-12-10 11:10:04.66
+77caabc8
+User
+severity: 'ERROR',
+2025-12-10 11:10:04.66
+77caabc8
+User
+file: 'parse_relation.c',
+2025-12-10 11:10:04.66
+77caabc8
+User
+where: undefined,
+2025-12-10 11:10:04.66
+77caabc8
+User
+internalPosition: undefined,
+2025-12-10 11:10:04.66
+77caabc8
+User
+at /home/runner/workspace/dist/index.cjs:70:13356
+2025-12-10 11:10:04.66
+77caabc8
+User
+table: undefined,
+2025-12-10 11:10:04.66
+77caabc8
+User
+Get profile error: error: column "profile_photo" does not exist
+2025-12-10 11:10:04.66
+77caabc8
+User
+dataType: undefined,
+2025-12-10 11:10:04.66
+77caabc8
+User
+column: undefined,
+2025-12-10 11:10:04.70
+77caabc8
+User
+8:10:04 AM [express] GET /api/profile 500 in 73ms :: {"message":"Profil alınırken hata oluştu"}
+2025-12-10 11:10:29.27
+77caabc8
+User
+8:10:29 AM [express] POST /api/cv/parse 200 in 8946ms :: {"jobTitle":"Senior Business Analyst & System Engineer","bio":"Detail-oriented and results-driven Senior Business Analyst and System Engineer with experience in business analysis, system design, and project management. Expertise in requirement gathering, UML modeling, Agile methodologies, and software testing.","skills":["Business Analysis","System Design","Project Management","Requirement Gathering","UML Modeling","Agile Methodologies","Software Testing","Process Optimization","Digital Transformation"],"experience":[{"title":"Senior Business Analyst & System Engineer","company":"BiB Yazılım Savunma A.Ş. (Havelsan - DOOB-M)","description":"Gathering and analyzing business requirements, documenting system specifications, creating UML diagrams, data models, and process flows."},{"title":"Project Unit Manager","company":"Securitas","description":"Led project planning, team coordination, and stakeholder communication, managed project timelines, deadlines, and performance assessments."},{"title":"Business Analyst / Strategic Change Management Project Specialist","company":"Securitas","description":"Analyzed business processes and initiated improvement projects, created workflow diagrams, mockups, and documentation."},{"title":"Quality Engineer","company":"Erkunt Sanayi","description":"Managed quality improvement projects, data analysis, and reporting, implemented quality systems such as SPC."},{"title":"Member Services & Administrative Affairs","company":"Sports International","description":"Handled customer inquiries, complaints, and organized training events."},{"title":"Industrial Engineering Graduation Project","company":"Arçelik","description":"Developed an optimization model to enhance production efficiency and minimize idle time."}],"education":[{"degree":"Endüstri Mühendisliği Lisans","school":"TED Üniversitesi"},{"degree":"İşletme Yan Dal","school":"TED Üniversitesi"}],"warnings":[],"degraded":false}
+2025-12-10 11:10:58.85
+53b6cc34
+System
+system: received signal terminated
+2025-12-10 11:11:11.35
+77caabc8
+User
+at async /home/runner/workspace/dist/index.cjs:330:194178 {
+2025-12-10 11:11:11.35
+77caabc8
+User
+column: undefined,
+2025-12-10 11:11:11.35
+77caabc8
+User
+file: 'parse_relation.c',
+2025-12-10 11:11:11.35
+77caabc8
+User
+line: '3722',
