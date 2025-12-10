@@ -46,6 +46,7 @@ interface Profile {
   website: string | null;
   linkedinUrl: string | null;
   githubUrl: string | null;
+  profilePhoto: string | null;
   skills: string[];
   experience: any[];
   education: any[];
@@ -123,6 +124,7 @@ export default function Profile() {
       website: profile?.website || "",
       linkedinUrl: profile?.linkedinUrl || "",
       githubUrl: profile?.githubUrl || "",
+      profilePhoto: profile?.profilePhoto || "",
       skills: profile?.skills || [],
     });
     setIsEditing(true);
@@ -328,9 +330,36 @@ export default function Profile() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-6 items-start">
-            <Avatar className="size-24 md:size-32 border-4 border-background shadow-xl">
-              <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
-            </Avatar>
+            <div className="relative group">
+              <Avatar className="size-24 md:size-32 border-4 border-background shadow-xl">
+                {profile?.profilePhoto ? (
+                  <AvatarImage src={profile.profilePhoto} alt="Profil fotoğrafı" />
+                ) : null}
+                <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
+              </Avatar>
+              {isEditing && (
+                <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const dataUrl = event.target?.result as string;
+                          setEditForm({ ...editForm, profilePhoto: dataUrl });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    data-testid="input-profile-photo"
+                  />
+                  <Upload className="size-6 text-white" />
+                </label>
+              )}
+            </div>
             <div className="flex-1 space-y-2">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
