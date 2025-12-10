@@ -174,7 +174,7 @@ export async function parseCVText(cvText: string): Promise<ParseCVResult> {
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -188,9 +188,21 @@ Return a JSON object with the following structure:
     {"title": "Job Title", "company": "Company Name", "description": "Brief description of role"}
   ],
   "education": [
-    {"degree": "Degree Name", "school": "School Name"}
+    {"degree": "Degree Name (e.g., Lisans, Yüksek Lisans, Doktora, Bachelor's, Master's)", "school": "School/University Name"}
   ]
 }
+
+IMPORTANT RULES FOR EDUCATION:
+- Include ALL education entries found in the CV
+- For Turkish universities: "Lisans" = Bachelor's degree, "Yüksek Lisans" = Master's degree, "Ön Lisans" = Associate degree
+- If someone attended a university program, they likely have a degree - extract it
+- Common degree names: Lisans, Yüksek Lisans, Doktora, Mühendislik, İşletme, Bilgisayar Mühendisliği, etc.
+- If only school name is mentioned without degree type, infer "Lisans" (Bachelor's) for 4-year university programs
+- Always extract the field of study as part of degree (e.g., "Bilgisayar Mühendisliği Lisans Derecesi")
+
+Example education extractions:
+- "Boğaziçi Üniversitesi Bilgisayar Mühendisliği" → {"degree": "Bilgisayar Mühendisliği Lisans", "school": "Boğaziçi Üniversitesi"}
+- "ODTÜ MBA" → {"degree": "İşletme Yüksek Lisans (MBA)", "school": "Orta Doğu Teknik Üniversitesi"}
 
 Extract as much relevant information as possible. If something is not found, use null for strings or empty arrays for lists.
 Always respond with valid JSON only.`

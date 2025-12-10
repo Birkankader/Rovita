@@ -473,9 +473,9 @@ export async function registerRoutes(
           .filter(skill => !existingSkills.has(skill.toLowerCase().trim()))
           .slice(0, 5);
 
-        for (const skill of questsToCreate) {
+        const questPromises = questsToCreate.map(async (skill) => {
           const { tasks, description } = await generateQuestTasks(skill, analysisInput.jobTitle);
-          await storage.createLearningQuest(req.session.userId!, {
+          return storage.createLearningQuest(req.session.userId!, {
             title: `${skill} Öğren`,
             description,
             targetSkill: skill,
@@ -487,7 +487,9 @@ export async function registerRoutes(
             jobAnalysisId: analysis.id,
             jobTitle: analysisInput.jobTitle,
           });
-        }
+        });
+        
+        await Promise.all(questPromises);
       }
 
       void storage.pruneOldJobAnalyses(req.session.userId!, 3);

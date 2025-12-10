@@ -78,6 +78,7 @@ export default function Profile() {
   const [isDragging, setIsDragging] = useState(false);
   const [isSavingImport, setIsSavingImport] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedEducation, setSelectedEducation] = useState<Education | null>(null);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<Profile>) => {
@@ -711,7 +712,12 @@ export default function Profile() {
                 </div>
                 {profile?.education && profile.education.length > 0 ? (
                   profile.education.map((edu: any, i: number) => (
-                    <div key={i} className="flex gap-4 group">
+                    <div 
+                      key={i} 
+                      className="flex gap-4 group cursor-pointer p-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
+                      onClick={() => setSelectedEducation(edu)}
+                      data-testid={`education-item-${i}`}
+                    >
                       <div className="mt-1 bg-primary/10 p-2 rounded-lg h-fit">
                         <GraduationCap className="size-5 text-primary" />
                       </div>
@@ -722,7 +728,10 @@ export default function Profile() {
                             variant="ghost"
                             size="icon"
                             className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-destructive"
-                            onClick={() => handleRemoveEducation(i)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveEducation(i);
+                            }}
                             data-testid={`button-delete-education-${i}`}
                           >
                             <Trash2 className="size-4" />
@@ -883,6 +892,35 @@ export default function Profile() {
               ) : (
                 "Profili Güncelle"
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Education Detail Dialog */}
+      <Dialog open={!!selectedEducation} onOpenChange={(open) => !open && setSelectedEducation(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GraduationCap className="size-5 text-primary" />
+              Eğitim Detayları
+            </DialogTitle>
+          </DialogHeader>
+          {selectedEducation && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-sm">Derece / Bölüm</Label>
+                <p className="text-lg font-semibold">{selectedEducation.degree}</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-sm">Okul / Üniversite</Label>
+                <p className="text-lg font-medium text-primary">{selectedEducation.school}</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedEducation(null)}>
+              Kapat
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -517,17 +517,17 @@ export default function Roadmap() {
                   {completedQuests.slice(0, 5).map((quest) => (
                     <div 
                       key={quest.id} 
-                      className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 cursor-pointer hover:from-green-100 hover:to-emerald-100 hover:border-green-300 hover:shadow-sm transition-all"
+                      className="flex items-center justify-between p-4 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/50 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/40 hover:border-green-300 dark:hover:border-green-700 hover:shadow-sm transition-all"
                       onClick={() => setSelectedQuestId(quest.id)}
                       data-testid={`completed-quest-${quest.id}`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="size-8 rounded-full bg-green-500 flex items-center justify-center">
+                        <div className="size-8 rounded-full bg-green-500 dark:bg-green-600 flex items-center justify-center">
                           <CheckCircle2 className="size-4 text-white" />
                         </div>
                         <div>
                           <h4 className="font-semibold text-sm text-foreground">{quest.title}</h4>
-                          <p className="text-xs text-green-700">{quest.targetSkill}</p>
+                          <p className="text-xs text-green-700 dark:text-green-400">{quest.targetSkill}</p>
                           {quest.jobTitle && (
                             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                               <Briefcase className="size-3" />
@@ -536,7 +536,7 @@ export default function Roadmap() {
                           )}
                         </div>
                       </div>
-                      <Badge className="bg-green-600 text-white hover:bg-green-700">
+                      <Badge className="bg-green-600 dark:bg-green-700 text-white hover:bg-green-700 dark:hover:bg-green-600">
                         +{quest.xp} XP
                       </Badge>
                     </div>
