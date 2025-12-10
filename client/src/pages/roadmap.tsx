@@ -90,15 +90,28 @@ export default function Roadmap() {
       const res = await apiRequest("DELETE", `/api/quests/${questId}`);
       return res.json();
     },
-    onSuccess: (_, questId) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
+    onMutate: async (questId: string) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/quests"] });
+      const previousQuests = queryClient.getQueryData<LearningQuest[]>(["/api/quests"]);
+      queryClient.setQueryData<LearningQuest[]>(["/api/quests"], (old) => 
+        old?.filter(q => q.id !== questId) || []
+      );
       if (questId === selectedQuestId) {
         setSelectedQuestId(null);
       }
+      return { previousQuests };
+    },
+    onSuccess: () => {
       toast({ title: "Görev reddedildi", description: "Görev listenizden kaldırıldı." });
     },
-    onError: () => {
+    onError: (_, __, context) => {
+      if (context?.previousQuests) {
+        queryClient.setQueryData(["/api/quests"], context.previousQuests);
+      }
       toast({ title: "Hata", description: "Görev reddedilirken hata oluştu.", variant: "destructive" });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
     },
   });
 

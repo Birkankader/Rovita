@@ -490,6 +490,8 @@ export async function registerRoutes(
         }
       }
 
+      void storage.pruneOldJobAnalyses(req.session.userId!, 3);
+      
       res.status(201).json(analysis);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -504,6 +506,7 @@ export async function registerRoutes(
   app.get("/api/job-analysis", requireAuth, async (req: Request, res: Response) => {
     try {
       const analyses = await storage.getJobAnalyses(req.session.userId!);
+      void storage.pruneOldJobAnalyses(req.session.userId!, 3);
       res.json(analyses);
     } catch (error) {
       console.error("Get job analyses error:", error);

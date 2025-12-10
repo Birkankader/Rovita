@@ -20,7 +20,7 @@ import {
   type InsertAssessmentResult,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -37,6 +37,7 @@ export interface IStorage {
   getJobAnalyses(userId: string): Promise<JobAnalysis[]>;
   getJobAnalysis(id: string): Promise<JobAnalysis | undefined>;
   createJobAnalysis(userId: string, analysis: InsertJobAnalysis): Promise<JobAnalysis>;
+  pruneOldJobAnalyses(userId: string, keepCount?: number): Promise<void>;
   
   // Learning Quest operations
   getLearningQuests(userId: string): Promise<LearningQuest[]>;
@@ -115,6 +116,23 @@ export class DatabaseStorage implements IStorage {
       .values({ ...analysis, userId })
       .returning();
     return jobAnalysis;
+  }
+
+  async pruneOldJobAnalyses(userId: string, keepCount: number = 3): Promise<void> {
+    try {
+      const allAnalyses = await db
+        .select({ id: jobAnalyses.id })
+        .from(jobAnalyses)
+        .where(eq(jobAnalyses.userId, userId))
+        .orderBy(desc(jobAnalyses.createdAt));
+      
+      if (allAnalyses.length > keepCount) {
+        const idsToDelete = allAnalyses.slice(keepCount).map(a => a.id);
+        await db.delete(jobAnalyses).where(inArray(jobAnalyses.id, idsToDelete));
+      }
+    } catch (error) {
+      console.error("Error pruning old job analyses:", error);
+    }
   }
 
   // Learning Quest operations

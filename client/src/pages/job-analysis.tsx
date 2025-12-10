@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Briefcase, CheckCircle2, XCircle, AlertCircle, ArrowRight, Loader2, Link as LinkIcon, Info, Download } from "lucide-react";
+import { Briefcase, CheckCircle2, XCircle, AlertCircle, ArrowRight, Loader2, Link as LinkIcon, Info, Download, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,6 +33,7 @@ export default function JobAnalysis() {
   const [jobDescription, setJobDescription] = useState("");
   const [jobUrl, setJobUrl] = useState("");
   const [result, setResult] = useState<JobAnalysis | null>(null);
+  const [fromHistory, setFromHistory] = useState(false);
   const [showUrlWarning, setShowUrlWarning] = useState(false);
 
   const isJobUrl = (text: string) => {
@@ -88,6 +89,7 @@ export default function JobAnalysis() {
     },
     onSuccess: (data) => {
       setResult(data);
+      setFromHistory(false);
       queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/job-analysis"] });
       toast({ title: "Analiz tamamlandı!", description: "Sonuçlarınız hazır." });
@@ -248,6 +250,20 @@ export default function JobAnalysis() {
 
         {/* Results Section */}
         <div className="space-y-6">
+          {fromHistory && hasResult && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setResult(null);
+                setFromHistory(false);
+              }}
+              className="mb-2"
+              data-testid="button-back-latest-analyses"
+            >
+              <ArrowLeft className="size-4 mr-2" />
+              Geri Dön
+            </Button>
+          )}
           {!hasResult ? (
             <div className="h-full border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center text-center p-8 text-muted-foreground bg-muted/20">
               <Briefcase className="size-12 mb-4 opacity-20" />
@@ -259,7 +275,10 @@ export default function JobAnalysis() {
                     {previousAnalyses.slice(0, 3).map((analysis) => (
                       <button
                         key={analysis.id}
-                        onClick={() => setResult(analysis)}
+                        onClick={() => {
+                          setResult(analysis);
+                          setFromHistory(true);
+                        }}
                         className="group block w-full text-left px-4 py-3 rounded-lg border border-border bg-card hover:bg-primary/5 hover:border-primary/30 hover:shadow-md transition-all duration-200 cursor-pointer"
                         data-testid={`button-previous-analysis-${analysis.id}`}
                       >
