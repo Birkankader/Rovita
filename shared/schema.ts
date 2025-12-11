@@ -9,6 +9,15 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   firstName: text("first_name"),
   lastName: text("last_name"),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const emailVerificationCodes = pgTable("email_verification_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull(),
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -73,6 +82,7 @@ export const assessmentResults = pgTable("assessment_results", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   assessmentType: text("assessment_type").notNull(),
+  level: integer("level").notNull().default(1),
   score: integer("score").notNull(),
   feedback: text("feedback"),
   responses: jsonb("responses").default({}),

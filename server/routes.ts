@@ -15,6 +15,7 @@ import multer from "multer";
 import { parseCVText } from "./cv-parser";
 import { analyzeJobWithAI, generateQuestTasks } from "./job-analyzer";
 import * as cheerio from "cheerio";
+import { sendVerificationEmail } from "./email";
 
 // Lazy load pdf-parse to handle both ESM (dev) and CJS (prod) environments
 let PDFParseClass: any = null;
@@ -107,12 +108,45 @@ export async function registerRoutes(
     education: z.array(educationSchema).max(10).optional().transform(arr => arr ?? []),
   }).optional();
 
-  // Register
+  // Send verification code
+  app.post("/api/auth/send-verification", async (req: Request, res: Response) => {
+    try {
+      const schema = z.object({
+        email: z.string().email("Geçerli bir email adresi girin"),
+      });
+
+      const { email } = schema.parse(req.body);
+      
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Bu email adresi zaten kayıtlı" });
+      }
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      await storage.createVerificationCode(email, code);
+      
+      const sent = await sendVerificationEmail(email, code);
+      if (!sent) {
+        return res.status(500).json({ message: "Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin." });
+      }
+
+      res.json({ message: "Doğrulama kodu gönderildi" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error("Send verification error:", error);
+      res.status(500).json({ message: "Doğrulama kodu gönderilirken hata oluştu" });
+    }
+  });
+
+  // Register with verification
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
       const registerSchema = z.object({
         email: z.string().email("Geçerli bir email adresi girin"),
         password: z.string().min(6, "Şifre en az 6 karakter olmalı"),
+        verificationCode: z.string().length(6, "Doğrulama kodu 6 haneli olmalı"),
         firstName: z.string().optional(),
         lastName: z.string().optional(),
         cvData: cvDataSchema,
@@ -125,6 +159,16 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Bu email adresi zaten kayıtlı" });
       }
 
+      const storedCode = await storage.getVerificationCode(data.email);
+      if (!storedCode) {
+        return res.status(400).json({ message: "Doğrulama kodu bulunamadı veya süresi dolmuş" });
+      }
+      if (storedCode.code !== data.verificationCode) {
+        return res.status(400).json({ message: "Doğrulama kodu hatalı" });
+      }
+
+      await storage.deleteVerificationCode(data.email);
+
       const hashedPassword = await hashPassword(data.password);
       const user = await storage.createUser({
         email: data.email,
@@ -132,6 +176,8 @@ export async function registerRoutes(
         firstName: data.firstName || null,
         lastName: data.lastName || null,
       });
+
+      await storage.updateUserEmailVerified(user.id, true);
 
       let profileData = {};
       if (data.cvData) {

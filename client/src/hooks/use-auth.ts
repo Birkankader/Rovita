@@ -21,6 +21,7 @@ interface LoginData {
 interface RegisterData {
   email: string;
   password: string;
+  verificationCode: string;
   firstName?: string;
   lastName?: string;
   cvData?: {

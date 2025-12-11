@@ -5,6 +5,7 @@ import {
   learningQuests,
   userProgress,
   assessmentResults,
+  emailVerificationCodes,
   type User,
   type InsertUser,
   type SelectUser,
@@ -20,7 +21,7 @@ import {
   type InsertAssessmentResult,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq, desc, inArray, and, lt, gt } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -53,7 +54,15 @@ export interface IStorage {
   
   // Assessment operations
   getAssessmentResults(userId: string): Promise<AssessmentResult[]>;
+  getAssessmentResultByTypeAndLevel(userId: string, assessmentType: string, level: number): Promise<AssessmentResult | undefined>;
+  getMaxLevelForAssessment(userId: string, assessmentType: string): Promise<number>;
   createAssessmentResult(userId: string, result: InsertAssessmentResult): Promise<AssessmentResult>;
+  
+  // Email verification operations
+  createVerificationCode(email: string, code: string): Promise<void>;
+  getVerificationCode(email: string): Promise<{ code: string; expiresAt: Date } | undefined>;
+  deleteVerificationCode(email: string): Promise<void>;
+  updateUserEmailVerified(userId: string, verified: boolean): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -208,6 +217,70 @@ export class DatabaseStorage implements IStorage {
       .values({ ...result, userId })
       .returning();
     return assessmentResult;
+  }
+
+  async getAssessmentResultByTypeAndLevel(userId: string, assessmentType: string, level: number): Promise<AssessmentResult | undefined> {
+    const [result] = await db
+      .select()
+      .from(assessmentResults)
+      .where(
+        and(
+          eq(assessmentResults.userId, userId),
+          eq(assessmentResults.assessmentType, assessmentType),
+          eq(assessmentResults.level, level)
+        )
+      );
+    return result || undefined;
+  }
+
+  async getMaxLevelForAssessment(userId: string, assessmentType: string): Promise<number> {
+    const results = await db
+      .select({ level: assessmentResults.level, score: assessmentResults.score })
+      .from(assessmentResults)
+      .where(
+        and(
+          eq(assessmentResults.userId, userId),
+          eq(assessmentResults.assessmentType, assessmentType)
+        )
+      )
+      .orderBy(desc(assessmentResults.level));
+    
+    if (results.length === 0) return 1;
+    
+    const highestCompleted = results.find(r => r.score >= 70);
+    if (highestCompleted) {
+      return Math.min(highestCompleted.level + 1, 3);
+    }
+    return results[0].level;
+  }
+
+  // Email verification operations
+  async createVerificationCode(email: string, code: string): Promise<void> {
+    await db.delete(emailVerificationCodes).where(eq(emailVerificationCodes.email, email));
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    await db.insert(emailVerificationCodes).values({ email, code, expiresAt });
+  }
+
+  async getVerificationCode(email: string): Promise<{ code: string; expiresAt: Date } | undefined> {
+    const [record] = await db
+      .select()
+      .from(emailVerificationCodes)
+      .where(
+        and(
+          eq(emailVerificationCodes.email, email),
+          gt(emailVerificationCodes.expiresAt, new Date())
+        )
+      );
+    if (!record) return undefined;
+    return { code: record.code, expiresAt: record.expiresAt };
+  }
+
+  async deleteVerificationCode(email: string): Promise<void> {
+    await db.delete(emailVerificationCodes).where(eq(emailVerificationCodes.email, email));
+  }
+
+  async updateUserEmailVerified(userId: string, verified: boolean): Promise<void> {
+    await db.update(users).set({ emailVerified: verified }).where(eq(users.id, userId));
   }
 }
 
