@@ -79,6 +79,80 @@ export default function Profile() {
   const [isSavingImport, setIsSavingImport] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedEducation, setSelectedEducation] = useState<Education | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+  const MAX_IMAGE_DIMENSION = 800;
+
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let { width, height } = img;
+          
+          if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+            if (width > height) {
+              height = (height / width) * MAX_IMAGE_DIMENSION;
+              width = MAX_IMAGE_DIMENSION;
+            } else {
+              width = (width / height) * MAX_IMAGE_DIMENSION;
+              height = MAX_IMAGE_DIMENSION;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handlePhotoSelect = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Hata", description: "Sadece resim dosyaları kabul edilir", variant: "destructive" });
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast({ title: "Uyarı", description: "Dosya boyutu 2MB'dan büyük, sıkıştırılıyor...", variant: "default" });
+    }
+
+    setIsUploadingPhoto(true);
+    setUploadProgress(20);
+
+    try {
+      setUploadProgress(50);
+      const compressedDataUrl = await compressImage(file);
+      setUploadProgress(80);
+      
+      setPhotoPreview(compressedDataUrl);
+      setEditForm({ ...editForm, profilePhoto: compressedDataUrl });
+      setUploadProgress(100);
+      
+      toast({ title: "Başarılı", description: "Fotoğraf yüklendi. Kaydetmek için 'Kaydet' butonuna tıklayın." });
+    } catch (error) {
+      toast({ title: "Hata", description: "Fotoğraf işlenirken hata oluştu", variant: "destructive" });
+    } finally {
+      setTimeout(() => {
+        setIsUploadingPhoto(false);
+        setUploadProgress(0);
+      }, 500);
+    }
+  };
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<Profile>) => {
@@ -92,6 +166,7 @@ export default function Profile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
       setIsEditing(false);
+      setPhotoPreview(null);
       toast({ title: "Başarılı", description: "Profil güncellendi." });
     },
     onError: (error: Error) => {
@@ -333,7 +408,9 @@ export default function Profile() {
           <div className="flex flex-col md:flex-row gap-6 items-start">
             <div className="relative group">
               <Avatar className="size-24 md:size-32 border-4 border-background shadow-xl">
-                {profile?.profilePhoto ? (
+                {(isEditing && photoPreview) ? (
+                  <AvatarImage src={photoPreview} alt="Profil fotoğrafı önizleme" />
+                ) : profile?.profilePhoto ? (
                   <AvatarImage src={profile.profilePhoto} alt="Profil fotoğrafı" />
                 ) : null}
                 <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
@@ -342,23 +419,28 @@ export default function Profile() {
                 <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     className="hidden"
-                    onChange={async (e) => {
+                    onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                          const dataUrl = event.target?.result as string;
-                          setEditForm({ ...editForm, profilePhoto: dataUrl });
-                        };
-                        reader.readAsDataURL(file);
-                      }
+                      if (file) handlePhotoSelect(file);
                     }}
                     data-testid="input-profile-photo"
                   />
-                  <Upload className="size-6 text-white" />
+                  {isUploadingPhoto ? (
+                    <div className="flex flex-col items-center">
+                      <Loader2 className="size-6 text-white animate-spin" />
+                      <span className="text-xs text-white mt-1">%{uploadProgress}</span>
+                    </div>
+                  ) : (
+                    <Upload className="size-6 text-white" />
+                  )}
                 </label>
+              )}
+              {isEditing && photoPreview && (
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  Yeni
+                </div>
               )}
             </div>
             <div className="flex-1 space-y-2">
@@ -384,7 +466,7 @@ export default function Profile() {
                 <div className="flex gap-2">
                   {isEditing ? (
                     <>
-                      <Button variant="outline" size="sm" onClick={() => setIsEditing(false)} data-testid="button-cancel">
+                      <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setPhotoPreview(null); }} data-testid="button-cancel">
                         <X className="mr-2 size-4" />
                         İptal
                       </Button>
