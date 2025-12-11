@@ -64,12 +64,9 @@ export default function Roadmap() {
       const res = await apiRequest("PUT", `/api/quests/${id}`, data);
       return res.json();
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/progress"] });
-      if (variables.data.status === "completed" && variables.id === selectedQuestId) {
-        setSelectedQuestId(null);
-      }
       toast({ title: "Başarılı", description: "Görev güncellendi." });
     },
   });
@@ -122,14 +119,11 @@ export default function Roadmap() {
   }, [authLoading, isAuthenticated, setLocation]);
 
   useEffect(() => {
-    const currentSelected = selectedQuestId ? quests.find(q => q.id === selectedQuestId) : null;
-    const needsNewSelection = !selectedQuestId || (currentSelected && currentSelected.status === "completed");
-    
-    if (quests.length > 0 && needsNewSelection) {
+    if (quests.length > 0 && !selectedQuestId) {
       const activeQuest = quests.find(q => q.status === "active" || q.status === "in_progress");
       const firstNonCompleted = quests.find(q => q.status !== "completed");
-      const nextQuestId = activeQuest?.id || firstNonCompleted?.id || null;
-      if (nextQuestId !== selectedQuestId) {
+      const nextQuestId = activeQuest?.id || firstNonCompleted?.id || quests[0]?.id || null;
+      if (nextQuestId) {
         setSelectedQuestId(nextQuestId);
       }
     }
@@ -247,8 +241,17 @@ export default function Roadmap() {
             </Card>
           ) : (
             (() => {
+              const softSkillTypes = ["leadership", "communication", "problem_solving", "empathy", "adaptability"];
+              
               const groupedQuests = activeQuests.reduce((groups, quest) => {
-                const key = quest.jobTitle || "Diğer Görevler";
+                let key: string;
+                if (quest.jobTitle) {
+                  key = quest.jobTitle;
+                } else if (softSkillTypes.includes(quest.targetSkill?.toLowerCase())) {
+                  key = "Sosyal Beceriler";
+                } else {
+                  key = "Diğer Görevler";
+                }
                 if (!groups[key]) groups[key] = [];
                 groups[key].push(quest);
                 return groups;
@@ -265,11 +268,19 @@ export default function Roadmap() {
                   <div key={groupName} className="space-y-2">
                     <button
                       onClick={() => toggleGroup(groupName)}
-                      className="w-full flex items-center gap-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-left"
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors text-left ${
+                        groupName === "Sosyal Beceriler" 
+                          ? "bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50" 
+                          : "bg-muted/50 hover:bg-muted"
+                      }`}
                       data-testid={`group-header-${groupName}`}
                     >
                       {isExpanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-                      <Briefcase className="size-4 text-primary" />
+                      {groupName === "Sosyal Beceriler" ? (
+                        <BrainCircuit className="size-4 text-orange-600" />
+                      ) : (
+                        <Briefcase className="size-4 text-primary" />
+                      )}
                       <span className="font-medium text-sm flex-1 truncate">{groupName}</span>
                       <Badge variant="secondary" className="text-xs">{groupQuests.length}</Badge>
                     </button>
