@@ -440,49 +440,55 @@ export default function Roadmap() {
                   </div>
                 )}
 
-                <div className="flex gap-4 pt-4 border-t">
-                  {selectedQuest.status === "pending" && (
-                    <Button
-                      className="flex-1"
-                      onClick={() => handleStartQuest(selectedQuest)}
-                      disabled={updateQuestMutation.isPending}
-                      data-testid={`button-start-${selectedQuest.id}`}
-                    >
-                      {updateQuestMutation.isPending ? (
-                        <Loader2 className="mr-2 size-4 animate-spin" />
-                      ) : null}
-                      Göreve Başla
-                    </Button>
-                  )}
-                  {(selectedQuest.status === "active" || selectedQuest.status === "in_progress") && (
-                    <>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleUpdateProgress(selectedQuest, Math.min(selectedQuest.progress + 25, 100))}
-                        disabled={updateQuestMutation.isPending}
-                        data-testid="button-update-progress"
-                      >
-                        İlerleme Kaydet (+25%)
-                      </Button>
+                {selectedQuest.status !== "completed" && (
+                  <div className="flex gap-4 pt-4 border-t">
+                    {selectedQuest.status === "pending" && (
                       <Button
                         className="flex-1"
-                        onClick={() => handleCompleteQuest(selectedQuest)}
+                        onClick={() => handleStartQuest(selectedQuest)}
                         disabled={updateQuestMutation.isPending}
-                        data-testid="button-complete-active"
+                        data-testid={`button-start-${selectedQuest.id}`}
                       >
                         {updateQuestMutation.isPending ? (
                           <Loader2 className="mr-2 size-4 animate-spin" />
-                        ) : (
-                          <CheckCircle2 className="mr-2 size-4" />
-                        )}
-                        Görevi Tamamla
+                        ) : null}
+                        Göreve Başla
                       </Button>
-                    </>
-                  )}
-                </div>
+                    )}
+                    {(selectedQuest.status === "active" || selectedQuest.status === "in_progress") && (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleUpdateProgress(selectedQuest, Math.min(selectedQuest.progress + 25, 100))}
+                          disabled={updateQuestMutation.isPending}
+                          data-testid="button-update-progress"
+                        >
+                          İlerleme Kaydet (+25%)
+                        </Button>
+                        <Button
+                          className="flex-1"
+                          onClick={() => handleCompleteQuest(selectedQuest)}
+                          disabled={updateQuestMutation.isPending}
+                          data-testid="button-complete-active"
+                        >
+                          {updateQuestMutation.isPending ? (
+                            <Loader2 className="mr-2 size-4 animate-spin" />
+                          ) : (
+                            <CheckCircle2 className="mr-2 size-4" />
+                          )}
+                          Görevi Tamamla
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
 
                 <p className="text-sm text-muted-foreground text-center">
-                  Tamamladığınızda <span className="font-bold text-accent">+{selectedQuest.xp} XP</span> kazanacaksınız.
+                  {selectedQuest.status === "completed" ? (
+                    <span className="text-green-600 font-medium">Bu görevi tamamlayarak <span className="font-bold">+{selectedQuest.xp} XP</span> kazandınız!</span>
+                  ) : (
+                    <>Tamamladığınızda <span className="font-bold text-accent">+{selectedQuest.xp} XP</span> kazanacaksınız.</>
+                  )}
                 </p>
               </CardContent>
             </Card>
