@@ -825,6 +825,7 @@ export async function registerRoutes(
     try {
       const resultData = z.object({
         assessmentType: z.string(),
+        level: z.number().min(1).max(3).default(1),
         score: z.number(),
         feedback: z.string().optional(),
         responses: z.record(z.any()).optional(),
