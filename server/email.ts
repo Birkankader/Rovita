@@ -44,9 +44,12 @@ export async function getResendClient() {
 
 export async function sendVerificationEmail(to: string, code: string): Promise<boolean> {
   try {
-    const { client, fromEmail } = await getResendClient();
+    console.log('[Email] Attempting to send verification email to:', to);
     
-    await client.emails.send({
+    const { client, fromEmail } = await getResendClient();
+    console.log('[Email] Got Resend client, fromEmail:', fromEmail);
+    
+    const result = await client.emails.send({
       from: fromEmail || 'noreply@resend.dev',
       to: [to],
       subject: 'Rotiva - E-posta Doğrulama Kodu',
@@ -72,9 +75,18 @@ export async function sendVerificationEmail(to: string, code: string): Promise<b
       `,
     });
     
+    console.log('[Email] Send result:', JSON.stringify(result));
+    
+    if (result.error) {
+      console.error('[Email] Resend API error:', result.error);
+      return false;
+    }
+    
+    console.log('[Email] Successfully sent to:', to, 'Email ID:', result.data?.id);
     return true;
-  } catch (error) {
-    console.error('Email sending failed:', error);
+  } catch (error: any) {
+    console.error('[Email] Failed to send verification email:', error?.message || error);
+    console.error('[Email] Full error:', JSON.stringify(error, null, 2));
     return false;
   }
 }
