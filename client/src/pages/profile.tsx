@@ -442,6 +442,11 @@ export default function Profile() {
                   Yeni
                 </div>
               )}
+              {isEditing && !photoPreview && (
+                <p className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">
+                  Maks. 2MB
+                </p>
+              )}
             </div>
             <div className="flex-1 space-y-2">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
