@@ -2,16 +2,22 @@
 
 ## Overview
 
-Rotiva is a gamified career development platform that helps users bridge the gap between their current skills and their dream jobs. The application analyzes job descriptions, identifies skill gaps, and creates personalized learning roadmaps with an engaging, game-like progression system.
+Rotiva is a single-page career development platform that helps users bridge the gap between their current skills and their dream jobs. Users upload their CV, paste a job posting, and receive a personalized visual learning roadmap.
 
 **Core Features:**
-- Job posting analysis and skill gap identification
-- Personalized learning quest/roadmap generation
-- Gamification with XP, levels, streaks, and achievements
-- User profile management with skills and experience tracking
-- Soft skills assessment through scenario-based questions
+- Single-page workflow: CV upload → Job posting input → Visual roadmap
+- AI-powered skill gap analysis using OpenAI
+- Interactive visual roadmap using React Flow
+- PDF export of the learning roadmap
+- Turkish language UI
 
-**Target Users:** Job seekers and career developers looking to systematically improve their skills and track their progress toward specific career goals.
+**Target Users:** Job seekers looking to understand skill gaps and create a learning plan for their dream job.
+
+## Recent Changes (December 2024)
+- Migrated to single-page architecture (workspace.tsx)
+- Added React Flow for visual roadmap visualization
+- Implemented PDF export with html2canvas + jsPDF
+- Simplified navigation - removed multi-page structure
 
 ## User Preferences
 
