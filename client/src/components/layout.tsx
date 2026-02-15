@@ -1,11 +1,14 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Briefcase, LogOut, Moon, Sun } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, User, Briefcase, LayoutDashboard, Map, LogOut, Settings, Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Notifications } from "./notifications";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
   const { user, logout, isLoggingOut } = useAuth();
   const [isDark, setIsDark] = useState(false);
 
@@ -28,46 +31,136 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  const navItems = [
+    { label: "Panel", href: "/dashboard", icon: LayoutDashboard },
+    { label: "İş Analizi", href: "/job-analysis", icon: Briefcase },
+    { label: "Yol Haritası", href: "/roadmap", icon: Map },
+    { label: "Değerlendirme", href: "/assessment", icon: User },
+    { label: "Profil", href: "/profile", icon: User },
+  ];
+
+  const isActive = (path: string) => location === path;
+
   return (
     <div className="min-h-screen flex flex-col bg-background font-sans text-foreground">
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight hover:opacity-80 transition-opacity">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground">
+            <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
               <Briefcase className="size-5" />
             </div>
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Rotiva</span>
+            <span>Rotiva</span>
           </Link>
 
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={toggleTheme}
-              className="text-muted-foreground"
-              data-testid="button-theme-toggle"
-            >
-              {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
-              <span className="sr-only">Tema Değiştir</span>
-            </Button>
-            
-            {user && (
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={async () => {
-                  await logout();
-                  window.location.href = "/login";
-                }}
-                disabled={isLoggingOut}
-                className="text-muted-foreground hover:text-destructive"
-                data-testid="button-logout"
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-6">
+            {navItems.map((item) => (
+              <Link 
+                key={item.href} 
+                href={item.href}
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  isActive(item.href) ? "text-primary" : "text-muted-foreground"
+                }`}
               >
-                <LogOut className="size-4 mr-2" />
-                {isLoggingOut ? "Çıkılıyor..." : "Çıkış"}
-              </Button>
+                {item.label}
+              </Link>
+            ))}
+            {user && (
+              <>
+                <div className="h-6 w-px bg-border mx-2" />
+                
+                <Notifications />
+                
+                <Link href="/settings">
+                  <Button variant="ghost" size="icon" className={isActive("/settings") ? "text-primary bg-muted" : "text-muted-foreground"}>
+                    <Settings className="size-5" />
+                    <span className="sr-only">Ayarlar</span>
+                  </Button>
+                </Link>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={toggleTheme}
+                  className="text-muted-foreground"
+                  data-testid="button-theme-toggle"
+                >
+                  {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
+                  <span className="sr-only">Tema Değiştir</span>
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={async () => {
+                    await logout();
+                    window.location.href = "/";
+                  }}
+                  disabled={isLoggingOut}
+                  className="text-muted-foreground hover:text-destructive"
+                  data-testid="button-logout-desktop"
+                >
+                  <LogOut className="size-5" />
+                  <span className="sr-only">Çıkış Yap</span>
+                </Button>
+              </>
             )}
-          </div>
+          </nav>
+
+          {/* Mobile Nav */}
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="size-5" />
+                <span className="sr-only">Menüyü Aç</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <nav className="flex flex-col gap-4 mt-8">
+                {navItems.map((item) => (
+                  <Link 
+                    key={item.href} 
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
+                      isActive(item.href)
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <item.icon className="size-5" />
+                    {item.label}
+                  </Link>
+                ))}
+                {user && (
+                  <>
+                    <div className="h-px bg-border my-2" />
+                    <Link 
+                      href="/settings"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-md text-muted-foreground hover:bg-muted transition-colors"
+                    >
+                      <Settings className="size-5" />
+                      Ayarlar
+                    </Link>
+                    <button
+                      onClick={async () => {
+                        setIsOpen(false);
+                        await logout();
+                        window.location.href = "/";
+                      }}
+                      disabled={isLoggingOut}
+                      className="flex items-center gap-3 px-4 py-3 rounded-md text-destructive hover:bg-destructive/10 transition-colors w-full text-left"
+                      data-testid="button-logout-mobile"
+                    >
+                      <LogOut className="size-5" />
+                      {isLoggingOut ? "Çıkış yapılıyor..." : "Çıkış Yap"}
+                    </button>
+                  </>
+                )}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </header>
 
@@ -75,9 +168,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <footer className="border-t py-6 bg-muted/30">
+      <footer className="border-t py-8 bg-muted/30">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Rotiva. Kariyer gelişim platformu.</p>
+          <p>&copy; {new Date().getFullYear()} Rotiva. Tüm hakları saklıdır.</p>
         </div>
       </footer>
     </div>
